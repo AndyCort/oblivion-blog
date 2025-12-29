@@ -12,7 +12,7 @@ export default defineConfig({
     },
     server: {
         port: 5173,
-        allowedHosts: ['localhost', '127.0.0.1', 'TomMac.local', 'blog.1314451.xyz'],
+        allowedHosts: ['*'],
         proxy: {
             '/api': {
                 target: 'http://localhost:3001',
