@@ -28,20 +28,18 @@ const ipAddressText = ref('IP Address: 0.0.0.0')
   border-top: none;
   margin-top: -1px;
   padding: 20px 0;
+
+  p {
+    margin: 5px 0;
+  }
+
+  a {
+    color: var(--main-color);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
-
-.footer p {
-  margin: 5px 0;
-}
-
-.footer a {
-  color: var(--accent-color);
-  text-decoration: none;
-}
-
-.footer a:hover {
-  text-decoration: underline;
-}
-
-
 </style>

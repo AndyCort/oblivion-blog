@@ -1,5 +1,5 @@
 <template>
-    <div class="random-quote-box glass">
+    <div class="random-quote-box" >
         <div class="quote-icon">
             <i class="fas fa-quote-left"></i>
         </div>
@@ -143,25 +143,31 @@ onUnmounted(() => {
 
 <style scoped>
 .random-quote-box {
-    text-align: center;
-    color: var(--text-color);
-    max-width: 600px;
+  text-align: center;
+  color: var(--frame-color);
+  max-width: 600px;
+  border-radius: 5px;
+  padding: 10px;
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+  background-color: var(--glass-bg-color);
+  box-shadow: 0 4px 30px #00000030;
 }
 
 .quote-icon {
-    font-size: 2rem;
+  font-size: clamp(1rem, 2.5vh, 2rem);
 }
 
 .quote-content {
-    font-family: var(--content-font);
-    font-size: 1.2rem;
-    margin: 12px 0;
-}
+  font-family: var(--content-font);
+  font-size: clamp(1rem, 1.5vh + 0.5rem, 1.4rem);
+  margin: clamp(0.5rem, 1.5vh, 1.5rem) 0;
 
-.quote-content::after {
-  content: '|';
-  margin-left: 2px;
-  animation: blink 1s infinite;
+  &::after {
+    content: '|';
+    margin-left: 2px;
+    animation: blink 1s infinite;
+  }
 }
 
 @keyframes blink {

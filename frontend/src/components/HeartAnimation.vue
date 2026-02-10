@@ -104,31 +104,29 @@ onUnmounted(() => {
 
 <style scoped>
 .heart-animation-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 9999;
-    overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
 }
 
 .floating-heart {
-    position: absolute;
-    pointer-events: none;
-    animation: floatUp var(--duration) ease-out forwards;
+  position: absolute;
+  pointer-events: none;
+  animation: floatUp var(--duration) ease-out forwards;
 }
 
-/* Pure CSS flat heart */
 .heart-shape {
-    position: relative;
-    width: var(--size);
-    height: calc(var(--size) * 0.9);
-}
+  position: relative;
+  width: var(--size);
+  height: calc(var(--size) * 0.9);
 
-.heart-shape::before,
-.heart-shape::after {
+  &::before,
+  &::after {
     content: '';
     position: absolute;
     top: 0;
@@ -136,38 +134,39 @@ onUnmounted(() => {
     height: var(--size);
     background: var(--color);
     border-radius: calc(var(--size) * 0.6) calc(var(--size) * 0.6) 0 0;
-}
+  }
 
-.heart-shape::before {
+  &::before {
     left: calc(var(--size) * 0.5);
     transform: rotate(-45deg);
     transform-origin: 0 100%;
-}
+  }
 
-.heart-shape::after {
+  &::after {
     left: 0;
     transform: rotate(45deg);
     transform-origin: 100% 100%;
+  }
 }
 
 @keyframes floatUp {
-    0% {
-        transform: translateY(0) translateX(0) scale(0.5) rotate(0deg);
-        opacity: 0;
-    }
-    10% {
-        transform: translateY(-10px) translateX(calc(var(--drift) * 0.1)) scale(1) rotate(calc(var(--rotation) * 0.2));
-        opacity: 0.85;
-    }
-    100% {
-        transform: translateY(-150px) translateX(var(--drift)) scale(0.3) rotate(var(--rotation));
-        opacity: 0;
-    }
+  0% {
+    transform: translateY(0) translateX(0) scale(0.5) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    transform: translateY(-10px) translateX(calc(var(--drift) * 0.1)) scale(1) rotate(calc(var(--rotation) * 0.2));
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(-150px) translateX(var(--drift)) scale(0.3) rotate(var(--rotation));
+    opacity: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .floating-heart {
-        animation-duration: 0.5s;
-    }
+  .floating-heart {
+    animation-duration: 0.5s;
+  }
 }
 </style>

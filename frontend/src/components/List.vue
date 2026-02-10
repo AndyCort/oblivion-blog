@@ -219,14 +219,12 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* 文章区域 */
 .list-title {
   color: var(--main-color);
   font-size: 2.5rem;
   font-weight: 700;
-  margin: 20px 0;
+  margin: 0 0 20px 0;
   text-align: center;
-
 }
 
 .article-list {
@@ -235,7 +233,6 @@ onMounted(async () => {
   margin: 0 auto;
 }
 
-/* 加载状态 */
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -259,7 +256,6 @@ onMounted(async () => {
   to { transform: rotate(360deg); }
 }
 
-/* 空状态 */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -269,17 +265,16 @@ onMounted(async () => {
   padding: 80px 20px;
   color: var(--text-color);
   opacity: 0.6;
+
+  i {
+    font-size: 48px;
+  }
+
+  p {
+    font-size: 16px;
+  }
 }
 
-.empty-state i {
-  font-size: 48px;
-}
-
-.empty-state p {
-  font-size: 16px;
-}
-
-/* 文章单列布局 */
 .articles-grid {
   display: flex;
   flex-direction: column;
@@ -288,7 +283,6 @@ onMounted(async () => {
   margin: 0 auto;
 }
 
-/* 文章卡片 - 毛玻璃效果 */
 .article-card {
   display: flex;
   flex-direction: column;
@@ -298,14 +292,25 @@ onMounted(async () => {
   transition: all 0.3s ease;
   position: relative;
   width: 100%;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--glass-box-shadow);
+
+    .article-cover {
+      background-size: 110%;
+    }
+
+    .read-more {
+      opacity: 1;
+
+      i {
+        transform: translateX(4px);
+      }
+    }
+  }
 }
 
-.article-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--glass-box-shadow);
-}
-
-/* 文章封面 */
 .article-cover {
   display: flex;
   width: 100%;
@@ -328,22 +333,17 @@ onMounted(async () => {
 }
 
 .meta-left {
-position: absolute;
-top: 0;
-left: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .meta-right {
-position: absolute;
-top: 0;
-right: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
-.article-card:hover .article-cover {
-  background-size: 110%;
-}
-
-/* 文章内容 */
 .article-content {
   padding: 20px;
   flex: 1;
@@ -358,45 +358,44 @@ right: 0;
   color: var(--text-color);
   line-height: 1.6;
   margin: 0;
+
+  &:hover .title-text {
+    color: var(--main-color);
+
+    &::after {
+      background-color: var(--main-color);
+      width: calc(100% + 20px);
+    }
+  }
 }
 
 .title-text {
   position: relative;
   display: inline;
   padding-bottom: 2px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: calc(100% + 20px);
+    height: 1.5px;
+    background-color: var(--text-color);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1.5px;
+    background-color: var(--main-color);
+    transition: width 0.5s ease;
+  }
 }
 
-.title-text::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: calc(100% + 20px);
-  height: 1.5px;
-  background-color: var(--text-color);
-  
-}
-
-.title-text::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 1.5px;
-  background-color: var(--main-color);
-  transition: width 0.5s ease;
-
-}
-
-.article-title:hover .title-text {
-  color: var(--main-color);
-}
-
-.article-title:hover .title-text::after {
-  background-color: var(--main-color);
-  width: calc(100% + 20px);
-}
 .article-summary {
   font-size: 0.9rem;
   color: var(--text-color);
@@ -410,7 +409,6 @@ right: 0;
   overflow: hidden;
 }
 
-/* 文章元信息 */
 .article-meta {
   display: flex;
   flex-wrap: wrap;
@@ -424,13 +422,12 @@ right: 0;
   display: flex;
   align-items: center;
   gap: 6px;
+
+  i {
+    font-size: 12px;
+  }
 }
 
-.meta-item i {
-  font-size: 12px;
-}
-
-/* 标签 */
 .article-tags {
   display: flex;
   flex-wrap: wrap;
@@ -447,7 +444,6 @@ right: 0;
   opacity: 0.8;
 }
 
-/* 文章底部 */
 .article-footer {
   padding: 16px 20px;
   border-top: 1px solid var(--glass-border-color);
@@ -461,22 +457,13 @@ right: 0;
   color: var(--text-color);
   opacity: 0.8;
   transition: all 0.2s;
+
+  i {
+    font-size: 12px;
+    transition: transform 0.2s;
+  }
 }
 
-.read-more i {
-  font-size: 12px;
-  transition: transform 0.2s;
-}
-
-.article-card:hover .read-more {
-  opacity: 1;
-}
-
-.article-card:hover .read-more i {
-  transform: translateX(4px);
-}
-
-/* 分页样式 */
 .pagination {
   display: flex;
   justify-content: center;
@@ -501,20 +488,20 @@ right: 0;
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid var(--glass-border-color);
-}
 
-.pagination-btn:hover:not(:disabled) {
-  background: var(--bg-tertiary);
-  transform: translateY(-2px);
-}
+  &:hover:not(:disabled) {
+    background: var(--main-color);
+    transform: translateY(-2px);
+  }
 
-.pagination-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 
-.pagination-btn i {
-  font-size: 12px;
+  i {
+    font-size: 12px;
+  }
 }
 
 .pagination-numbers {
@@ -538,25 +525,24 @@ right: 0;
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid var(--glass-border-color);
+
+  &:hover:not(:disabled):not(.active) {
+    background: var(--main-color);
+  }
+
+  &.active {
+    color: var(--main-color);
+    border-color: var(--main-color);
+    font-weight: 600;
+  }
+
+  &.ellipsis {
+    cursor: default;
+    background: transparent;
+    border: none;
+  }
 }
 
-.pagination-num:hover:not(:disabled):not(.active) {
-  background: var(--bg-tertiary);
-}
-
-.pagination-num.active {
-  background: var(--text-color);
-  color: var(--bg-color);
-  font-weight: 600;
-}
-
-.pagination-num.ellipsis {
-  cursor: default;
-  background: transparent;
-  border: none;
-}
-
-/* 列表动画 */
 .list-enter-active,
 .list-leave-active {
   transition: all 0.4s ease;
@@ -568,12 +554,6 @@ right: 0;
   transform: translateY(20px);
 }
 
-
-
-
-
-
-/* 响应式设计 */
 @media (max-width: 768px) {
   .list-title {
     font-size: 1.8rem;
@@ -644,10 +624,10 @@ right: 0;
   .pagination-btn {
     padding: 8px 12px;
     font-size: 0.8rem;
-  }
 
-  .pagination-btn span {
-    display: none;
+    span {
+      display: none;
+    }
   }
 
   .pagination-numbers {
@@ -664,7 +644,6 @@ right: 0;
   }
 }
 
-/* 响应式设计 - 小手机 */
 @media (max-width: 480px) {
   .list-title {
     font-size: 1.5rem;

@@ -206,9 +206,11 @@ function updateScroll() {
     const navBar = document.querySelector('.nav-bar')
     if (navBar) {
       if (scrollY > 0) {
-        navBar.style.backdropFilter = 'blur(10px)'
-        navBar.style.webkitBackdropFilter = 'blur(10px)'
-        navBar.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+        if (themeStore.theme === 'light') {
+          navBar.style.backdropFilter = 'blur(10px)'
+          navBar.style.webkitBackdropFilter = 'blur(10px)'
+          navBar.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+        }
       } else {
         navBar.style.backdropFilter = 'none'
         navBar.style.webkitBackdropFilter = 'none'
@@ -232,9 +234,6 @@ onUnmounted(() => {
 })
 </script>
 <style scoped>
-
-
-/* 导航栏 */
 .nav-bar {
   font-family: var(--title-font);
   display: flex;
@@ -248,13 +247,12 @@ onUnmounted(() => {
   z-index: 1000;
   transition: transform 0.3s ease;
   box-sizing: border-box;
+
+  &.nav-hidden {
+    transform: translateY(-100%);
+  }
 }
 
-.nav-bar.nav-hidden {
-  transform: translateY(-100%);
-}
-
-/* 左侧 - 网站标题 */
 .nav-left {
   flex-shrink: 0;
 }
@@ -263,14 +261,12 @@ onUnmounted(() => {
   font-size: 1.5rem;
   font-weight: bold;
   font-family: var(--site-title-font);
-  /* 使用白色，mix-blend-mode: difference 会让它在浅色背景上变深，深色背景上变浅 */
   color: var(--main-color);
   mix-blend-mode: difference;
   text-decoration: none;
   transition: color 0.2s;
 }
 
-/* 中间 - 导航菜单 */
 .nav-middle {
   flex: 1;
   display: flex;
@@ -283,47 +279,39 @@ onUnmounted(() => {
   gap: 8px;
   margin: 0;
   padding: 0;
+
+  li a {
+    display: block;
+    padding: 8px 16px;
+    color: var(--frame-color);
+    text-decoration: none;
+    transition: color 0.2s;
+    position: relative;
+
+    &:hover,
+    &.router-link-active {
+      color: var(--main-color);
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 1.5px;
+      background-color: var(--main-color);
+      transition: width 0.3s ease, left 0.3s ease;
+    }
+
+    &:hover::after,
+    &.router-link-active::after {
+      width: 100%;
+      left: 0;
+    }
+  }
 }
 
-.nav-menu li a {
-  display: block;
-  padding: 8px 16px;
-  color: var(--text-color);
-  text-decoration: none;
-  transition: color 0.2s;
-  position: relative;
-}
-
-.nav-menu li a:hover,
-.nav-menu li a.router-link-active {
-  color: var(--main-color);
-}
-
-/* 下划线基础样式 */
-.nav-menu li a::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 1.5px;
-  background-color: var(--main-color);
-  transition: width 0.3s ease, left 0.3s ease;
-}
-
-/* 悬浮时下划线从中间向两边展开 */
-.nav-menu li a:hover::after {
-  width: 100%;
-  left: 0;
-}
-
-/* 选中状态显示完整下划线 */
-.nav-menu li a.router-link-active::after {
-  width: 100%;
-  left: 0;
-}
-
-/* 右侧 - 搜索和按钮 */
 .nav-right {
   display: flex;
   align-items: center;
@@ -331,65 +319,61 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-/* 搜索框 */
 .nav-search {
   display: flex;
   align-items: center;
+
+  form {
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
+  }
+
+  .search-input {
+    width: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    opacity: 0;
+    transition: all 0.3s ease;
+    color: var(--frame-color);
+    border-radius: 6px;
+  }
+
+  &.expanded .search-input {
+    width: 180px;
+    padding: 8px 12px;
+    opacity: 1;
+    border: 1px solid var(--border-color);
+    border-right: none;
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    color: var(--frame-color);
+    cursor: pointer;
+    transition: color 0.2s;
+    position: relative;
+    border-radius: 6px;
+  }
+
+  &.expanded button {
+    border-radius: 0 6px 6px 0;
+  }
 }
 
-.nav-search form {
-  display: flex;
-  align-items: center;
-}
-
-.nav-search .search-input {
-  width: 0;
-  padding: 0;
-  border: none;
-  outline: none;
-  opacity: 0;
-  transition: all 0.3s ease;
-  color: var(--text-color);
-  border-radius: 6px;
-}
-
-.nav-search.expanded .search-input {
-  width: 180px;
-  padding: 8px 12px;
-  opacity: 1;
-  border: 1px solid var(--border-color);
-  border-right: none;
-}
-
-.nav-search button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 36px;
-  background: transparent;
-  border: none;
-  color: var(--text-color);
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.nav-search button:hover {
-  color: var(--hover-color);
-}
-
-.nav-search.expanded button { 
-  border-radius: 0 6px 6px 0;
-}
-
-/* 功能按钮容器 */
 .nav-btns {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-/* 语言切换按钮 */
 .lang-btn {
   position: relative;
   display: flex;
@@ -399,20 +383,12 @@ onUnmounted(() => {
   height: 36px;
   background: transparent;
   border: none;
-  color: var(--text-color);
+  color: var(--frame-color);
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.2s;
 }
 
-.lang-btn:hover {
-  background: var(--hover-bg);
-  color: var(--hover-color);
-}
-
-
-
-/* 语言下拉菜单 - 毛玻璃效果 */
 .language-dropdown {
   position: absolute;
   top: 100%;
@@ -424,14 +400,31 @@ onUnmounted(() => {
   border-radius: 8px;
   overflow: hidden;
   z-index: 100;
-}
 
-.language-dropdown.glass {
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border-color);
-  box-shadow: var(--glass-box-shadow);
+  &.glass {
+    background: var(--glass-bg-color);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border-color);
+    box-shadow: var(--glass-box-shadow);
+  }
+
+  li {
+    padding: 10px 16px;
+    cursor: pointer;
+    color: var(--frame-color);
+    transition: all 0.2s;
+
+    &:hover {
+      color: var(--hover-color);
+      background: var(--hover-bg);
+    }
+
+    &.active {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+  }
 }
 
 :root.light-mode .language-dropdown.glass {
@@ -440,24 +433,6 @@ onUnmounted(() => {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
-.language-dropdown li {
-  padding: 10px 16px;
-  cursor: pointer;
-  color: var(--text-color);
-  transition: all 0.2s;
-}
-
-.language-dropdown li:hover {
-  color: var(--hover-color);
-  background: var(--hover-bg);
-}
-
-.language-dropdown li.active {
-  color: var(--accent-color);
-  font-weight: 600;
-}
-
-/* 深色模式切换按钮 */
 .dark-btn {
   display: flex;
   align-items: center;
@@ -466,20 +441,19 @@ onUnmounted(() => {
   height: 36px;
   background: transparent;
   border: none;
-  color: var(--text-color);
+  color: var(--frame-color);
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.2s;
 }
 
+.nav-search button:hover,
+.lang-btn:hover,
 .dark-btn:hover {
   background: var(--hover-bg);
   color: var(--hover-color);
 }
 
-
-
-/* 汉堡菜单按钮 - 默认隐藏 */
 .menu-toggle {
   display: none;
   align-items: center;
@@ -488,19 +462,18 @@ onUnmounted(() => {
   height: 36px;
   background: transparent;
   border: none;
-  color: var(--text-color);
+  color: var(--frame-color);
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.2s;
   font-size: 20px;
+
+  &:hover {
+    background: var(--hover-bg);
+    color: var(--hover-color);
+  }
 }
 
-.menu-toggle:hover {
-  background: var(--hover-bg);
-  color: var(--hover-color);
-}
-
-/* 移动端遮罩层 - 默认隐藏 */
 .mobile-overlay {
   display: none;
   position: fixed;
@@ -513,63 +486,57 @@ onUnmounted(() => {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
 }
 
-.mobile-overlay.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* 响应式布局 - 移动端 */
 @media (max-width: 768px) {
   .nav-bar {
     padding: 12px 16px;
   }
   
-  /* 显示汉堡菜单按钮 */
   .menu-toggle {
     display: flex;
     order: 3;
   }
   
-  /* 显示遮罩层 */
   .mobile-overlay {
     display: block;
   }
   
-  /* 中间导航菜单 - 侧边栏样式 */
   .nav-middle {
     position: fixed;
     top: 0;
     right: -280px;
     width: 280px;
     height: 100vh;
-    background: var(--bg-color);
     z-index: 1001;
     padding: 80px 20px 20px;
     box-sizing: border-box;
     transition: right 0.3s ease;
     box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
     overflow-y: auto;
-  }
-  
-  .nav-middle.mobile-open {
-    right: 0;
+
+    &.mobile-open {
+      right: 0;
+    }
   }
   
   .nav-menu {
     flex-direction: column;
     gap: 8px;
+
+    li a {
+      display: block;
+      padding: 14px 16px;
+      font-size: 16px;
+      border-radius: 8px;
+    }
   }
   
-  .nav-menu li a {
-    display: block;
-    padding: 14px 16px;
-    font-size: 16px;
-    border-radius: 8px;
-  }
-  
-  /* 右侧按钮区域 - 移动端放入侧边栏 */
   .nav-right {
     position: fixed;
     top: 0;
@@ -580,34 +547,30 @@ onUnmounted(() => {
     box-sizing: border-box;
     transition: right 0.3s ease;
     justify-content: flex-end;
-    background: var(--bg-color);
     border-bottom: 1px solid var(--border-color);
+
+    &.mobile-open {
+      right: 0;
+    }
   }
   
-  .nav-right.mobile-open {
-    right: 0;
-  }
-  
-  /* 搜索框移动端样式 */
   .nav-search {
     flex: 1;
+
+    &.expanded .search-input {
+      width: 100%;
+    }
+
+    form {
+      width: 100%;
+    }
   }
   
-  .nav-search.expanded .search-input {
-    width: 100%;
-  }
-  
-  .nav-search form {
-    width: 100%;
-  }
-  
-  /* 按钮组 */
   .nav-btns {
     gap: 4px;
   }
 }
 
-/* 更小屏幕适配 */
 @media (max-width: 480px) {
   .nav-bar {
     padding: 10px 12px;
@@ -621,20 +584,20 @@ onUnmounted(() => {
     width: 260px;
     right: -260px;
     padding: 70px 16px 16px;
-  }
-  
-  .nav-middle.mobile-open {
-    right: 0;
+
+    &.mobile-open {
+      right: 0;
+    }
   }
   
   .nav-right {
     width: 260px;
     right: -260px;
     padding: 16px;
-  }
-  
-  .nav-right.mobile-open {
-    right: 0;
+
+    &.mobile-open {
+      right: 0;
+    }
   }
   
   .nav-menu li a {

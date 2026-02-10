@@ -1,8 +1,8 @@
 /* ===== 浅色主题（默认） ===== */
 :root {
     /* 主要颜色 */
-    --bg-color: #fffffff2;
-    --main-color: #ff8d9f;
+    --bg-color: #daeefa;
+    --main-color: #f8c0d4;
 
 
     --test-color4: #e3dede;
@@ -19,11 +19,12 @@
     --heart-color5: #ffcced;
     --heart-color6: #ff1a1a;
     /* 文本颜色 */
-    --text-color: #a3a3a1;
+    --text-color: #000000;
     --content-color: #a3a3a1;
+    --frame-color: #333030;
     /* 边框 */
     --border-color: #00000019;
-    --border-primary: 1px solid #00000019;
+
 
     /* 导航栏 */
     --nav-bg: #ffffffe5;
@@ -34,9 +35,9 @@
     --hover-color: #130d0d;
 
     /* 毛玻璃效果 */
-    --glass-bg-color: #ffffff40;
-    --glass-border-color: rgba(0, 0, 0, 0.1);
-    --glass-box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+    --glass-bg-color: #ffffff21;
+    --glass-border-color: #00000019;
+    --glass-box-shadow: 0 8px 32px 0 #00000019;
 
     /* 首页背景 */
     --home-bg: url('https://images.unsplash.com/photo-1587279535322-b20697908487');
@@ -57,29 +58,31 @@
 /* ===== 深色主题 ===== */
 :root.dark-mode {
     /* 主要颜色 */
-    --bg-color: rgba(0, 0, 0, 0.9);
+    --bg-color: #071418;
 
+    --main-color: #f8c0d4;
 
     /* 文本颜色 */
     --text-color: #a3a3a1;
-    --text-secondary: rgba(255, 255, 255, 0.7);
-    --text-muted: rgba(255, 255, 255, 0.5);
+    --content-color: #a3a3a1;
+    --frame-color: #e3dede;
 
     /* 边框 */
-    --border-color: rgba(255, 255, 255, 0.1);
-    --border-primary: 1px solid rgba(255, 255, 255, 0.1);
+    --border-color: #ffffff19;
+
+
 
     /* 导航栏 */
-    --nav-bg: rgba(10, 10, 10, 0.85);
-    --input-bg: rgba(255, 255, 255, 0.1);
-    --title-color: rgba(255, 255, 255, 0.9);
-    --hover-bg: rgba(255, 255, 255, 0.1);
-    --hover-color: rgba(255, 255, 255, 0.9);
+    --nav-bg: #0a0a0a19;
+    --input-bg: #ffffff19;
+    --title-color: #ffffffd7;
+    --hover-bg: #ffffff19;
+    --hover-color: #ffffffd7;
 
     /* 毛玻璃效果 */
-    --glass-bg-color: rgba(0, 0, 0, 0.3);
-    --glass-border-color: rgba(255, 255, 255, 0.15);
-    --glass-box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    --glass-bg-color: #00000025;
+    --glass-border-color: #ffffff27;
+    --glass-box-shadow: 0 8px 32px 0 #00000067;
 
     /* 首页背景 */
     --home-bg: url('https://images.unsplash.com/photo-1519681393784-d120267933ba');
@@ -121,9 +124,9 @@
 [data-glass-hover] {
     background-color: rgba(0, 0, 0, 0);
     backdrop-filter: blur(0px);
-}
 
-[data-glass-hover]:hover {
-    background-color: var(--hover-bg);
-    backdrop-filter: blur(10px);
+    &:hover {
+        background: var(--glass-bg-color);
+        backdrop-filter: blur(10px);
+    }
 }

@@ -40,7 +40,6 @@
   width: 100%;
 }
 
-/* 头部 */
 .about-header {
   text-align: center;
   margin-bottom: 3rem;
@@ -65,23 +64,21 @@
   font-family: var(--content-font);
 }
 
-/* 内容 */
 .about-content {
   line-height: 1.8;
+
+  p {
+    color: var(--text-secondary);
+    font-family: var(--content-font);
+    font-size: 1.05rem;
+    margin-bottom: 1rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 }
 
-.about-content p {
-  color: var(--text-secondary);
-  font-family: var(--content-font);
-  font-size: 1.05rem;
-  margin-bottom: 1rem;
-}
-
-.about-content p:last-child {
-  margin-bottom: 0;
-}
-
-/* 分割线 */
 .divider {
   border: none;
   height: 1px;
@@ -89,7 +86,6 @@
   margin: 3rem 0;
 }
 
-/* 联系方式 */
 .contact {
   text-align: center;
 }
@@ -116,17 +112,16 @@
   text-decoration: none;
   font-size: 0.95rem;
   transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--text-color);
+  }
+
+  svg {
+    font-size: 1.1rem;
+  }
 }
 
-.contact-link:hover {
-  color: var(--text-color);
-}
-
-.contact-link svg {
-  font-size: 1.1rem;
-}
-
-/* 响应式 */
 @media (max-width: 768px) {
   .about-page {
     padding: 3rem 1.5rem;

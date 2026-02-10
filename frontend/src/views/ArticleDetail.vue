@@ -102,7 +102,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-
 .article-detail {
   min-height: 100vh;
   padding: 100px 20px 60px;
@@ -110,7 +109,6 @@ onMounted(async () => {
   margin: 0px auto;
 }
 
-/* 加载状态 */
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -134,7 +132,6 @@ onMounted(async () => {
   to { transform: rotate(360deg); }
 }
 
-/* 错误状态 */
 .error-state {
   display: flex;
   flex-direction: column;
@@ -143,35 +140,33 @@ onMounted(async () => {
   gap: 16px;
   padding: 120px 20px;
   color: var(--text-color);
+
+  i {
+    font-size: 64px;
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: 18px;
+    opacity: 0.7;
+  }
+
+  button {
+    padding: 10px 24px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+  }
 }
 
-.error-state i {
-  font-size: 64px;
-  opacity: 0.5;
-}
-
-.error-state p {
-  font-size: 18px;
-  opacity: 0.7;
-}
-
-.error-state button {
-  padding: 10px 24px;
-  background: var(--accent-color);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-/* 文章卡片 */
-.article{
+.article {
   border: 1px solid var(--glass-border-color);
   border-radius: 16px;
 }
 
-/* 文章头部 */
 .article-header {
   padding: 40px 40px 24px;
 }
@@ -217,33 +212,30 @@ onMounted(async () => {
   border-radius: 20px;
 }
 
-/* 封面图 */
 .article-cover {
   width: 100%;
   max-height: 400px;
   overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
-.article-cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* 正文 */
 .article-body {
   padding: 32px 40px;
   color: var(--text-color);
   font-size: 1.1rem;
   line-height: 1.8;
+
+  p {
+    margin: 0;
+    white-space: pre-wrap;
+  }
 }
 
-.article-body p {
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-/* 文章底部 */
 .article-footer {
   padding: 24px 40px;
   border-top: 1px solid var(--glass-border-color);
@@ -261,13 +253,12 @@ onMounted(async () => {
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
 }
 
-.back-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-/* 响应式 */
 @media (max-width: 768px) {
   .article-detail {
     padding: 80px 16px 40px;

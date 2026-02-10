@@ -29,37 +29,34 @@
 
 <style scoped>
 .social-icons {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: clamp(1rem, 2vw, 2rem);
-}
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0;
 
-.social-icons .container {
-    height: 3rem;
-    width: 3rem;
+  .container {
+    height: clamp(2rem, 4vh, 3rem);
+    width: clamp(2rem, 4vh, 3rem);
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0 12px;
+    margin: 0 clamp(6px, 1.5vw, 12px);
     border-radius: 50%;
-}
+  }
 
-
-.social-icons i {
+  i {
     justify-content: center;
     align-items: center;
-}
-.social-icons a {
-    font-size: 1.5rem;
+  }
+
+  a {
+    font-size: clamp(1rem, 2vh, 1.5rem);
     display: inline-block;
     align-items: center;
     justify-content: center;
-    color: var(--text-color);
+    color: var(--frame-color);
     transition: color 0.3s ease;
-    text-decoration: none; 
+    text-decoration: none;
+  }
 }
-
-
-
 </style>
