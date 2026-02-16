@@ -1,15 +1,19 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { motion, useMotionValue, useTransform, PanInfo, animate, useSpring } from 'framer-motion';
-import { Plus, Home, Settings, User, Bell, Search, Star, Heart } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHouse, faGear, faBell, faMagnifyingGlass, faStar, faHeart, faMusic } from '@fortawesome/free-solid-svg-icons';
+import { faCircle } from '@fortawesome/free-regular-svg-icons';
+import { useNavigate } from 'react-router-dom';
+import { useMusicContext } from '../stores/MusicContext';
 
 // --- Constants & Config ---
 const BUTTON_SIZE = 40;
 const OUTER_RADIUS = 160;
-const MENU_RADIUS = 100; // Radius where items sit
+const MENU_RADIUS = 75; // Radius where items sit
 const ITEM_SIZE = 40;
 const FAN_ANGLE = 90; // Degrees of the visible arc
-const ITEM_SPACING = 30; // Degrees between items
+const ITEM_SPACING = 35; // Degrees between items
 
 // --- Styled Components ---
 
@@ -61,15 +65,11 @@ const MenuItem = styled(motion.button)`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--frame-color);
   cursor: pointer;
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
   padding: 0;
-  
-  &:hover {
-    background: rgba(255, 255, 255, 0.5);
-    scale: 1.1;
-  }
+  pointer-events: auto;
 `;
 
 const TriggerButton = styled(motion.button)`
@@ -96,18 +96,39 @@ const TriggerButton = styled(motion.button)`
 // --- Helpers ---
 const toRad = (deg: number) => (deg * Math.PI) / 180;
 
-const menuItems = [
-    { id: 1, icon: <Home size={20} />, label: 'Home' },
-    { id: 2, icon: <User size={20} />, label: 'Profile' },
-    { id: 3, icon: <Settings size={20} />, label: 'Settings' },
-    { id: 4, icon: <Bell size={20} />, label: 'Notifications' },
-    { id: 5, icon: <Search size={20} />, label: 'Search' },
-    { id: 6, icon: <Star size={20} />, label: 'Favorites' },
-    { id: 7, icon: <Heart size={20} />, label: 'Likes' },
-];
+const coreIcon = <FontAwesomeIcon icon={faCircle} size="xl" />;
 
 const SideButton: React.FC = () => {
+    const navigate = useNavigate();
+    const { toggleMusic } = useMusicContext();
     const [isOpen, setIsOpen] = useState(false);
+
+    // Menu items with click handlers
+    const menuItems = [
+        {
+            id: 1,
+            icon: <FontAwesomeIcon icon={faHouse} size="xl" />,
+            label: 'Home',
+            onClick: () => {
+                navigate('/');
+                setIsOpen(false);
+            }
+        },
+        {
+            id: 2,
+            icon: <FontAwesomeIcon icon={faMusic} size="xl" />,
+            label: 'Music',
+            onClick: () => {
+                toggleMusic();
+                setIsOpen(false);
+            }
+        },
+        { id: 3, icon: <FontAwesomeIcon icon={faGear} size="xl" />, label: 'Settings' },
+        { id: 4, icon: <FontAwesomeIcon icon={faBell} size="xl" />, label: 'Notifications' },
+        { id: 5, icon: <FontAwesomeIcon icon={faMagnifyingGlass} size="xl" />, label: 'Search' },
+        { id: 6, icon: <FontAwesomeIcon icon={faStar} size="xl" />, label: 'Favorites' },
+        { id: 7, icon: <FontAwesomeIcon icon={faHeart} size="xl" />, label: 'Likes' },
+    ];
 
     // Rotation Logic
     const rotation = useMotionValue(0);
@@ -195,6 +216,7 @@ const SideButton: React.FC = () => {
                             rotation={rotationSpring}
                             icon={item.icon}
                             isOpen={isOpen}
+                            onClick={item.onClick}
                         />
                     );
                 })}
@@ -209,7 +231,7 @@ const SideButton: React.FC = () => {
                 whileTap={{ scale: 0.9 }}
                 animate={{ rotate: isOpen ? 135 : 0 }}
             >
-                <Plus size={28} />
+                {coreIcon}
             </TriggerButton>
         </Wrapper>
     );
@@ -217,7 +239,7 @@ const SideButton: React.FC = () => {
 
 // Subcomponent to handle individual motion value transforms
 // This avoids re-rendering the parent on every frame
-const MovingItem = ({ index, rotation, icon, isOpen }: { index: number, rotation: any, icon: any, isOpen: boolean }) => {
+const MovingItem = ({ index, rotation, icon, isOpen, onClick }: { index: number, rotation: any, icon: any, isOpen: boolean, onClick?: () => void }) => {
     const baseAngle = 270 - (index * ITEM_SPACING); // 270, 240, 210...
 
     // Transform rotation -> x, y
@@ -262,7 +284,7 @@ const MovingItem = ({ index, rotation, icon, isOpen }: { index: number, rotation
                 opacity,
                 scale
             }}
-            whileHover={{ scale: 1.2, zIndex: 10 }}
+            onClick={onClick}
         >
             {icon}
         </MenuItem>

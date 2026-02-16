@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled, { keyframes } from 'styled-components'
-import { useLocale } from '../stores/LocaleContext'
 import { useTranslation } from '../i18n/useTranslation'
 import { fetchArticles, type Article } from '../api/articles'
 import defaultCover from '../assets/home.jpg'
@@ -18,7 +17,7 @@ const spin = keyframes`
 `
 
 const ListTitle = styled.h2`
-  color: var(--main-color);
+
   font-size: 2.5rem;
   font-weight: 700;
   margin: 0 0 20px 0;
@@ -332,8 +331,7 @@ const PaginationNum = styled.button`
 
 export default function List() {
   const navigate = useNavigate()
-  const { locale } = useLocale()
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
 
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)

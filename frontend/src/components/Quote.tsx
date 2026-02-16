@@ -1,135 +1,133 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import styled, { keyframes } from 'styled-components'
-import { useLocale } from '../stores/LocaleContext'
-import { fetchRandomQuote } from '../api/quotes'
+import { useTranslation } from '../i18n/useTranslation'
 
-const AUTO_REFRESH_INTERVAL = 10000
+const TYPING_SPEED = 100
+const DELETING_SPEED = 60
+const PAUSE_AFTER_TYPING = 2000
+const PAUSE_AFTER_DELETING = 500
 
 const blink = keyframes`
+  0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 `
 
 const QuoteBox = styled.div`
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.5vw, 16px);
   color: var(--frame-color);
-  max-width: 600px;
-  border-radius: 5px;
-  padding: 10px;
-  backdrop-filter: blur(1px);
-  -webkit-backdrop-filter: blur(1px);
-  background-color: var(--glass-bg-color);
-  box-shadow: 0 4px 30px #00000030;
+  width: 90%;
+  max-width: 720px;
+  border-radius: 50px;
+  padding: 12px clamp(20px, 3vw, 32px);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  background: var(--glass-bg-color);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
 
-  @media (max-width: 768px) { margin: 0 20px; }
+  @media (max-width: 768px) {
+    width: calc(100% - 32px);
+    padding: 10px 20px;
+  }
 `
 
 const QuoteIcon = styled.div`
-  font-size: clamp(1rem, 2.5vh, 2rem);
+  font-size: clamp(0.75rem, 1.5vh, 1.1rem);
+  flex-shrink: 0;
+  opacity: 0.6;
 `
 
-const QuoteContent = styled.div`
+const QuoteText = styled.div<{ $isAnimating: boolean }>`
+  flex: 1;
   font-family: var(--content-font);
-  font-size: clamp(1rem, 1.5vh + 0.5rem, 1.4rem);
-  margin: clamp(0.5rem, 1.5vh, 1.5rem) 0;
+  font-size: clamp(0.85rem, 1.2vh + 0.5rem, 1.15rem);
+  line-height: 1.6;
+  min-height: 1.4em;
+  text-align: center;
 
   &::after {
     content: '|';
     margin-left: 2px;
     animation: ${blink} 1s infinite;
+    display: ${({ $isAnimating }) => ($isAnimating ? 'inline' : 'none')};
   }
 `
 
 export default function Quote() {
-    const { locale } = useLocale()
-    const [displayText, setDisplayText] = useState('')
-    const [quoteLoading, setQuoteLoading] = useState(false)
-    const animationTimerRef = useRef<NodeJS.Timeout | null>(null)
-    const autoRefreshTimerRef = useRef<NodeJS.Timeout | null>(null)
-    const localeRef = useRef(locale)
+    const { t, locale } = useTranslation()
+    const [quote, setQuote] = useState('')
+    const [displayedText, setDisplayedText] = useState('')
+    const [isDeleting, setIsDeleting] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-    useEffect(() => { localeRef.current = locale }, [locale])
+    const isAnimating = loading || displayedText !== quote || isDeleting
 
-    const clearAnimation = useCallback(() => {
-        if (animationTimerRef.current) { clearTimeout(animationTimerRef.current); animationTimerRef.current = null }
-    }, [])
-
-    const clearAutoRefresh = useCallback(() => {
-        if (autoRefreshTimerRef.current) { clearTimeout(autoRefreshTimerRef.current); autoRefreshTimerRef.current = null }
-    }, [])
-
-    const refreshQuoteRef = useRef<(() => Promise<void>) | null>(null)
-
-    const scheduleAutoRefresh = useCallback(() => {
-        clearAutoRefresh()
-        autoRefreshTimerRef.current = setTimeout(() => refreshQuoteRef.current?.(), AUTO_REFRESH_INTERVAL)
-    }, [clearAutoRefresh])
-
-    const startTyping = useCallback((text: string, onComplete?: () => void) => {
-        let index = 0
-        const type = () => {
-            if (index < text.length) {
-                const char = text[index]; index++
-                setDisplayText((prev) => prev + char)
-                animationTimerRef.current = setTimeout(type, 80)
-            } else { onComplete?.() }
-        }
-        type()
-    }, [])
-
-    const startDeleting = useCallback((currentText: string, onComplete?: () => void) => {
-        let remaining = currentText
-        const deleteChar = () => {
-            if (remaining.length > 0) {
-                remaining = remaining.slice(0, -1)
-                setDisplayText(remaining)
-                animationTimerRef.current = setTimeout(deleteChar, 40)
-            } else { onComplete?.() }
-        }
-        deleteChar()
-    }, [])
-
-    const animateQuoteChange = useCallback((newQuote: string, currentDisplayText: string) => {
-        clearAnimation()
-        if (currentDisplayText.length > 0) {
-            startDeleting(currentDisplayText, () => startTyping(newQuote, scheduleAutoRefresh))
-        } else {
-            startTyping(newQuote, scheduleAutoRefresh)
-        }
-    }, [clearAnimation, startDeleting, startTyping, scheduleAutoRefresh])
-
-    const refreshQuote = useCallback(async () => {
-        if (quoteLoading) return
-        clearAutoRefresh()
-        setQuoteLoading(true)
+    const QuoteApi = 'https://oiapi.net/api/Daily'
+    const fetchQuote = async () => {
         try {
-            const quote = await fetchRandomQuote(localeRef.current)
-            setDisplayText((prev) => { animateQuoteChange(quote, prev); return prev })
+            setLoading(true)
+            const res = await fetch(QuoteApi)
+            const data = await res.json()
+            const text = locale === 'zh-CN' ? data.data.zh : data.data.en
+            setQuote(text)
         } catch (error) {
-            console.error('Failed to fetch random quote:', error)
-            const errorText = localeRef.current === 'zh-CN' ? '获取名言失败，请稍后重试' : 'Failed to load quote, please try again'
-            setDisplayText((prev) => { animateQuoteChange(errorText, prev); return prev })
+            console.error('Failed to fetch quote:', error)
+            setQuote(t('quote.failed'))
         } finally {
-            setQuoteLoading(false)
+            setLoading(false)
         }
-    }, [quoteLoading, clearAutoRefresh, animateQuoteChange])
+    }
 
-    useEffect(() => { refreshQuoteRef.current = refreshQuote }, [refreshQuote])
-
+    // Initial fetch
     useEffect(() => {
-        refreshQuoteRef.current?.()
-        return () => { clearAnimation(); clearAutoRefresh() }
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+        fetchQuote()
+    }, [])
 
-    const prevLocaleRef = useRef(locale)
+    // Re-fetch on locale change
     useEffect(() => {
-        if (prevLocaleRef.current !== locale) { prevLocaleRef.current = locale; refreshQuoteRef.current?.() }
+        if (quote) fetchQuote()
     }, [locale])
+
+    // Typewriter effect
+    useEffect(() => {
+        if (!quote || loading) return
+
+        if (!isDeleting && displayedText.length < quote.length) {
+            // Typing forward
+            timeoutRef.current = setTimeout(() => {
+                setDisplayedText(quote.slice(0, displayedText.length + 1))
+            }, TYPING_SPEED)
+        } else if (!isDeleting && displayedText.length === quote.length) {
+            // Finished typing → pause then start deleting
+            timeoutRef.current = setTimeout(() => {
+                setIsDeleting(true)
+            }, PAUSE_AFTER_TYPING)
+        } else if (isDeleting && displayedText.length > 0) {
+            // Deleting backward
+            timeoutRef.current = setTimeout(() => {
+                setDisplayedText(displayedText.slice(0, -1))
+            }, DELETING_SPEED)
+        } else if (isDeleting && displayedText.length === 0) {
+            // Finished deleting → fetch new quote
+            setIsDeleting(false)
+            timeoutRef.current = setTimeout(() => {
+                fetchQuote()
+            }, PAUSE_AFTER_DELETING)
+        }
+
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current)
+        }
+    }, [displayedText, isDeleting, quote, loading])
 
     return (
         <QuoteBox>
-            <QuoteIcon><i className="fas fa-quote-left"></i></QuoteIcon>
-            <QuoteContent>{displayText}</QuoteContent>
-            <QuoteIcon><i className="fas fa-quote-right"></i></QuoteIcon>
+            <QuoteIcon><i className="fas fa-quote-left" /></QuoteIcon>
+            <QuoteText $isAnimating={isAnimating}>{displayedText}</QuoteText>
+            <QuoteIcon><i className="fas fa-quote-right" /></QuoteIcon>
         </QuoteBox>
     )
 }

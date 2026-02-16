@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import styled, { createGlobalStyle } from 'styled-components'
 import { useTheme } from './stores/ThemeContext'
+import { MusicProvider, useMusicContext } from './stores/MusicContext'
 import NavBar from './components/NavBar'
 import ScrollingBar from './components/ScrollingBar'
 import Footer from './components/Footer'
@@ -9,7 +10,7 @@ import Music from './components/Music'
 import HeartAnimation from './components/HeartAnimation'
 import Home from './views/Home'
 import About from './views/About'
-import ArticleDetail from './views/ArticleDetail'
+import ArticleView from './views/ArticleView'
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -53,27 +54,36 @@ const MainContent = styled.div`
   z-index: 1;
 `
 
-export default function App() {
+function AppContent() {
   const { theme } = useTheme()
+  const { isMusicVisible } = useMusicContext()
 
   return (
     <>
       <GlobalStyle />
       <ScrollingBar />
       <SideButton />
-      <Music />
+      {isMusicVisible && <Music />}
       <HeartAnimation />
       <AppWrapper data-theme={theme}>
         <NavBar />
         <MainContent>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/articles/:id" element={<ArticleDetail />} />
+            <Route path="/articles/:id" element={<ArticleView />} />
             <Route path="/about" element={<About />} />
           </Routes>
           <Footer />
         </MainContent>
       </AppWrapper>
     </>
+  )
+}
+
+export default function App() {
+  return (
+    <MusicProvider>
+      <AppContent />
+    </MusicProvider>
   )
 }

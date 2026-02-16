@@ -5,6 +5,8 @@ import { ThemeProvider } from './stores/ThemeContext'
 import { LocaleProvider } from './stores/LocaleContext'
 import App from './App'
 import '@/assets/style.css'
+import './i18n'
+
 
 ReactDOM.createRoot(document.getElementById('app')!).render(
     <React.StrictMode>

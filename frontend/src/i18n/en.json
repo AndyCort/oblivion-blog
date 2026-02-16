@@ -29,13 +29,14 @@
         "loading": "Loading...",
         "prev": "Previous",
         "next": "Next",
-        "pageInfo": "Page {current} of {total}"
+        "pageInfo": "Page {{current}} of {{total}}"
     },
     "about": {
         "title": "About",
         "content": "Oblivion is a personal blog for sharing life, technology, and thoughts."
     },
     "quote": {
-        "refresh": "Refresh"
+        "refresh": "Refresh",
+        "failed": "Failed to load quote, please try again"
     }
 }

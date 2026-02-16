@@ -29,13 +29,14 @@
         "loading": "加载中...",
         "prev": "上一页",
         "next": "下一页",
-        "pageInfo": "第 {current} 页 / 共 {total} 页"
+        "pageInfo": "Page {{current}} / {{total}}"
     },
     "about": {
         "title": "关于",
         "content": "半生雨是一个个人博客，用于分享生活、技术和思考。"
     },
     "quote": {
-        "refresh": "刷新"
+        "refresh": "刷新",
+        "failed": "获取名言失败，请稍后重试"
     }
 }

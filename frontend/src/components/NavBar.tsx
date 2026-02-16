@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { useTheme } from '../stores/ThemeContext'
-import { useLocale } from '../stores/LocaleContext'
+import { useTranslation } from '../i18n/useTranslation'
+import i18n from '../i18n'
 
 const menuItems = [
   { key: 'home', path: '/' },
@@ -10,14 +11,7 @@ const menuItems = [
   { key: 'about', path: '/about' },
 ]
 
-const translations = {
-  'zh-CN': { home: '首页', articles: '文章', about: '关于', search: '搜索...' },
-  'en-US': { home: 'Home', articles: 'Articles', about: 'About', search: 'Search...' },
-}
 
-function t(locale: string, key: string) {
-  return translations[locale as keyof typeof translations]?.[key as keyof (typeof translations)['zh-CN']] || key
-}
 
 const Nav = styled.nav`
   font-family: var(--title-font);
@@ -347,7 +341,7 @@ const MobileOverlay = styled.div`
 
 export default function NavBar() {
   const { theme, toggleTheme } = useTheme()
-  const { locale, setLocale } = useLocale()
+  const { t, locale } = useTranslation()
 
   const [showSearch, setShowSearch] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -356,7 +350,7 @@ export default function NavBar() {
   const searchInputRef = useRef<HTMLInputElement>(null)
   const lastScrollYRef = useRef(0)
 
-  const title = locale === 'zh-CN' ? '半生雨' : 'Oblivion'
+  const title = t('siteName')
 
   const toggleSearch = useCallback(() => {
     setShowSearch((prev) => {
@@ -378,7 +372,7 @@ export default function NavBar() {
 
   const handleSetLocale = (newLocale: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    setLocale(newLocale)
+    i18n.changeLanguage(newLocale)
     setDropdownOpen(false)
   }
 
@@ -454,7 +448,7 @@ export default function NavBar() {
             {menuItems.map((item) => (
               <li key={item.key}>
                 <Link to={item.path} onClick={() => handleMenuItemClick(item.key)}>
-                  {t(locale, item.key)}
+                  {t(`nav.${item.key}`)}
                 </Link>
               </li>
             ))}
@@ -468,7 +462,7 @@ export default function NavBar() {
                 ref={searchInputRef}
                 type="search"
                 name="s"
-                placeholder={t(locale, 'search')}
+                placeholder={t('search.placeholder')}
                 className="search-input"
                 data-glass=""
                 onFocus={() => setShowSearch(true)}

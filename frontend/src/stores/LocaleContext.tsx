@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+
 
 interface LocaleContextType {
     locale: string
@@ -10,27 +12,34 @@ interface LocaleContextType {
 const LocaleContext = createContext<LocaleContextType | null>(null)
 
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
-    const [locale, setLocaleState] = useState('zh-CN')
+    const { i18n: i18nInstance } = useTranslation()
+    const [locale, setLocaleState] = useState(i18nInstance.language)
 
     const initLocale = useCallback(() => {
-        const savedLocale = localStorage.getItem('locale')
-        if (savedLocale) {
-            setLocaleState(savedLocale)
-        }
-    }, [])
+        const current = i18nInstance.language
+        setLocaleState(current)
+        localStorage.setItem('locale', current)
+    }, [i18nInstance])
 
     const setLocale = useCallback((newLocale: string) => {
-        setLocaleState(newLocale)
-        localStorage.setItem('locale', newLocale)
-    }, [])
+        i18nInstance.changeLanguage(newLocale)
+    }, [i18nInstance])
 
     const toggleLocale = useCallback(() => {
-        setLocaleState((prev) => {
-            const next = prev === 'zh-CN' ? 'en-US' : 'zh-CN'
-            localStorage.setItem('locale', next)
-            return next
-        })
-    }, [])
+        const next = locale === 'zh-CN' ? 'en-US' : 'zh-CN'
+        i18nInstance.changeLanguage(next)
+    }, [locale, i18nInstance])
+
+    useEffect(() => {
+        const handleLanguageChanged = (lng: string) => {
+            setLocaleState(lng)
+            localStorage.setItem('locale', lng)
+        }
+        i18nInstance.on('languageChanged', handleLanguageChanged)
+        return () => {
+            i18nInstance.off('languageChanged', handleLanguageChanged)
+        }
+    }, [i18nInstance])
 
     useEffect(() => {
         initLocale()

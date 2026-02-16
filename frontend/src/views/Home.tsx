@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { useLocale } from '../stores/LocaleContext'
+
 import Quote from '../components/Quote'
 import Social from '../components/Social'
 import ScrollArrow from '../components/ScrollArrow'
@@ -46,37 +46,25 @@ const WelcomeContent = styled.div`
   box-sizing: border-box;
 `
 
-const WelcomeTitle = styled.h1`
-  font-size: clamp(1.5rem, 5vh, 3.5rem);
-  font-weight: 700;
-  margin: 0;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  font-family: var(--site-title-font);
-`
-
 const ListSection = styled.div`
   position: relative;
   z-index: 100;
 `
 
 export default function Home() {
-    const { locale } = useLocale()
-    const welcomeText = locale === 'zh-CN' ? '半生雨' : 'Oblivion'
-
-    return (
-        <>
-            <HomeSection>
-                <HomeBg />
-                <WelcomeContent>
-                    <WelcomeTitle>{welcomeText}</WelcomeTitle>
-                    <Quote />
-                    <Social />
-                </WelcomeContent>
-                <ScrollArrow />
-            </HomeSection>
-            <ListSection>
-                <List />
-            </ListSection>
-        </>
-    )
+  return (
+    <>
+      <HomeSection>
+        <HomeBg />
+        <WelcomeContent>
+          <Quote />
+          <Social />
+        </WelcomeContent>
+        <ScrollArrow />
+      </HomeSection>
+      <ListSection>
+        <List />
+      </ListSection>
+    </>
+  )
 }
