@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import styled, { keyframes } from 'styled-components'
+import { Helmet } from 'react-helmet-async'
 import { useTranslation } from '../i18n/useTranslation'
 import { fetchArticle, type Article } from '../api/articles'
+import Comments from '../components/Comments'
 
 const adSpin = keyframes`
 to { 
@@ -205,6 +207,9 @@ export default function ArticleView() {
 
   return (
     <Wrapper>
+      <Helmet>
+        <title>{getLocalizedField(article.title)} | Oblivion Blog</title>
+      </Helmet>
       <Article data-glass="">
         <ArticleHeader>
           <ArticleTitle>{getLocalizedField(article.title)}</ArticleTitle>
@@ -218,6 +223,8 @@ export default function ArticleView() {
         <Body><p>{getLocalizedField(article.content)}</p></Body>
         <FooterSection><BackBtn onClick={() => navigate(-1)}><i className="fas fa-arrow-left" />返回</BackBtn></FooterSection>
       </Article>
+
+      {id && <Comments articleId={id} />}
     </Wrapper>
   )
 }

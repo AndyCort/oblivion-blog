@@ -25,7 +25,7 @@ const QuoteBox = styled.div`
   -webkit-backdrop-filter: blur(12px) saturate(1.4);
   background: var(--glass-bg-color);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: none;
 
   @media (max-width: 768px) {
     width: calc(100% - 32px);

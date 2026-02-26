@@ -1,27 +1,38 @@
 const express = require('express');
 const router = express.Router();
-const fs = require('fs');
-const path = require('path');
+const Article = require('../models/Article');
+const { protect } = require('../middleware/auth');
 
-const dataPath = path.join(__dirname, '../data/articles.json');
-
-// Get all articles
-router.get('/', (req, res) => {
+// @desc    Get all articles
+// @route   GET /api/articles
+// @access  Public
+router.get('/', async (req, res) => {
     try {
-        const data = fs.readFileSync(dataPath, 'utf-8');
-        const articles = JSON.parse(data);
+        const articles = await Article.find({ isPublished: true }).sort({ id: -1 });
         res.json(articles);
     } catch (error) {
         res.status(500).json({ error: 'Failed to load articles' });
     }
 });
 
-// Get single article by id
-router.get('/:id', (req, res) => {
+// @desc    Get all articles (including drafts)
+// @route   GET /api/articles/all
+// @access  Private
+router.get('/all', protect, async (req, res) => {
     try {
-        const data = fs.readFileSync(dataPath, 'utf-8');
-        const articles = JSON.parse(data);
-        const article = articles.find(a => a.id === parseInt(req.params.id));
+        const articles = await Article.find().sort({ id: -1 });
+        res.json(articles);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to load articles' });
+    }
+});
+
+// @desc    Get single article by id
+// @route   GET /api/articles/:id
+// @access  Public
+router.get('/:id', async (req, res) => {
+    try {
+        const article = await Article.findOne({ id: parseInt(req.params.id), isPublished: true });
 
         if (!article) {
             return res.status(404).json({ error: 'Article not found' });
@@ -33,23 +44,91 @@ router.get('/:id', (req, res) => {
     }
 });
 
-// Search articles
-router.get('/search/:query', (req, res) => {
+// @desc    Search articles
+// @route   GET /api/articles/search/:query
+// @access  Public
+router.get('/search/:query', async (req, res) => {
     try {
-        const data = fs.readFileSync(dataPath, 'utf-8');
-        const articles = JSON.parse(data);
         const query = req.params.query.toLowerCase();
 
-        const results = articles.filter(article =>
-            article.title.zh.toLowerCase().includes(query) ||
-            article.title.en.toLowerCase().includes(query) ||
-            article.content.zh.toLowerCase().includes(query) ||
-            article.content.en.toLowerCase().includes(query)
-        );
+        // Perform a simple regex search across relevant fields
+        const articles = await Article.find({
+            isPublished: true,
+            $or: [
+                { 'title.zh': { $regex: query, $options: 'i' } },
+                { 'title.en': { $regex: query, $options: 'i' } },
+                { 'content.zh': { $regex: query, $options: 'i' } },
+                { 'content.en': { $regex: query, $options: 'i' } },
+            ],
+        });
 
-        res.json(results);
+        res.json(articles);
     } catch (error) {
         res.status(500).json({ error: 'Search failed' });
+    }
+});
+
+// @desc    Create new article
+// @route   POST /api/articles
+// @access  Private
+router.post('/', protect, async (req, res) => {
+    try {
+        const { title, date, tags, content, isPublished } = req.body;
+
+        // Generate a simple auto-increment ID for compatibility with previous logic
+        const lastArticle = await Article.findOne().sort({ id: -1 });
+        const newId = lastArticle ? lastArticle.id + 1 : 1;
+
+        const article = await Article.create({
+            id: newId,
+            title,
+            date,
+            tags,
+            content,
+            isPublished: isPublished !== undefined ? isPublished : true,
+        });
+
+        res.status(201).json(article);
+    } catch (error) {
+        res.status(400).json({ error: 'Failed to create article', details: error.message });
+    }
+});
+
+// @desc    Update article
+// @route   PUT /api/articles/:id
+// @access  Private
+router.put('/:id', protect, async (req, res) => {
+    try {
+        const article = await Article.findOneAndUpdate(
+            { id: parseInt(req.params.id) },
+            req.body,
+            { new: true, runValidators: true }
+        );
+
+        if (!article) {
+            return res.status(404).json({ error: 'Article not found' });
+        }
+
+        res.json(article);
+    } catch (error) {
+        res.status(400).json({ error: 'Failed to update article', details: error.message });
+    }
+});
+
+// @desc    Delete article
+// @route   DELETE /api/articles/:id
+// @access  Private
+router.delete('/:id', protect, async (req, res) => {
+    try {
+        const article = await Article.findOneAndDelete({ id: parseInt(req.params.id) });
+
+        if (!article) {
+            return res.status(404).json({ error: 'Article not found' });
+        }
+
+        res.json({ message: 'Article removed' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete article' });
     }
 });
 

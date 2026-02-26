@@ -11,8 +11,8 @@ const CardEl = styled.div`
   width: 300px;
   height: 300px;
   background: #fff;
-  border-radius: 40px;
-  box-shadow: 0 20px 25px #00000040;
+  box-shadow: none;
+  border: 1px solid #ddd;
   transition: 0.5s;
 
   &:hover { height: 420px; }
@@ -57,10 +57,10 @@ const Content = styled.div`
 `
 
 export default function ImageCard() {
-    return (
-        <Container>
-            <CardEl><ImgBx /><Content /></CardEl>
-            <CardEl><ImgBx /><Content /></CardEl>
-        </Container>
-    )
+  return (
+    <Container>
+      <CardEl><ImgBx /><Content /></CardEl>
+      <CardEl><ImgBx /><Content /></CardEl>
+    </Container>
+  )
 }

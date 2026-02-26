@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 
 const FooterWrapper = styled.footer`
@@ -17,11 +18,22 @@ const FooterWrapper = styled.footer`
 `
 
 export default function Footer() {
-    return (
-        <FooterWrapper>
-            <p>© 2023 Oblivion Blog. All rights reserved. Designed by{' '}<a href="https://inpa.in">Anya</a>.</p>
-            <p><i className="fa-solid fa-memory"></i> Memory usage: 0 MB.</p>
-            <p><i className="fa-solid fa-ethernet"></i> IP Address: 0.0.0.0</p>
-        </FooterWrapper>
-    )
+  const [footerText, setFooterText] = useState('© 2026 Oblivion Blog. All rights reserved.')
+
+  useEffect(() => {
+    fetch('http://localhost:3001/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.footerText) setFooterText(data.footerText)
+      })
+      .catch(() => { })
+  }, [])
+
+  return (
+    <FooterWrapper>
+      <p>{footerText} Designed by{' '}<a href="https://inpa.in">Anya</a>.</p>
+      <p><i className="fa-solid fa-memory"></i> Memory usage: 0 MB.</p>
+      <p><i className="fa-solid fa-ethernet"></i> IP Address: 0.0.0.0</p>
+    </FooterWrapper>
+  )
 }

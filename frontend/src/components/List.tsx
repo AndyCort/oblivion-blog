@@ -90,8 +90,7 @@ const Card = styled.article`
   width: 100%;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--glass-box-shadow);
+    border-color: var(--main-color);
   }
 
   &:hover .article-cover { background-size: 110%; }
@@ -229,6 +228,50 @@ const Tag = styled.span`
   @media (max-width: 768px) { padding: 3px 8px; font-size: 0.7rem; }
 `
 
+const TagCloud = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 30px;
+  width: clamp(200px, 60vw, 800px);
+  margin-left: auto;
+  margin-right: auto;
+  
+  @media (max-width: 768px) {
+    gap: 8px;
+    width: 100%;
+  }
+`
+
+const CloudTag = styled.button`
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  background: var(--glass-bg-color);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border-color);
+  border-radius: 20px;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  &.active {
+    background: var(--main-color);
+    color: var(--theme-color);
+    border-color: var(--main-color);
+    font-weight: 600;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+`
+
 const ReadMore = styled.span`
   display: inline-flex;
   align-items: center;
@@ -336,13 +379,30 @@ export default function List() {
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
+  const [selectedTag, setSelectedTag] = useState<string | null>(null)
   const pageSize = 5
 
-  const totalPages = useMemo(() => Math.ceil(articles.length / pageSize), [articles.length])
+  const allTags = useMemo(() => {
+    const tags = new Set<string>()
+    articles.forEach(article => {
+      if (article.tags) {
+        article.tags.forEach(tag => tags.add(tag))
+      }
+    })
+    return Array.from(tags).sort()
+  }, [articles])
+
+  const filteredArticles = useMemo(() => {
+    if (!selectedTag) return articles
+    return articles.filter(article => article.tags?.includes(selectedTag))
+  }, [articles, selectedTag])
+
+  const totalPages = useMemo(() => Math.ceil(filteredArticles.length / pageSize), [filteredArticles.length])
+
   const paginatedArticles = useMemo(() => {
     const start = (currentPage - 1) * pageSize
-    return articles.slice(start, start + pageSize)
-  }, [articles, currentPage])
+    return filteredArticles.slice(start, start + pageSize)
+  }, [filteredArticles, currentPage])
 
   const visiblePages = useMemo(() => {
     const pages = []
@@ -386,6 +446,15 @@ export default function List() {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  const handleTagClick = (tag: string) => {
+    if (selectedTag === tag) {
+      setSelectedTag(null) // Unselect
+    } else {
+      setSelectedTag(tag)
+    }
+    setCurrentPage(1) // Reset to first page
+  }
+
   useEffect(() => {
     let cancelled = false
       ; (async () => {
@@ -417,53 +486,76 @@ export default function List() {
           </EmptyState>
         ) : (
           <>
-            <Grid>
-              {paginatedArticles.map((article) => (
-                <Card key={article.id} data-glass="" onClick={() => goToArticle(article.id)}>
-                  <Cover className="article-cover" style={{ backgroundImage: `url(${getArticleCover(article)})` }}>
-                    <MetaOverlay className="left" data-glass="">
-                      <MetaItem><i className="far fa-calendar"></i>{formatDate(article.date)}</MetaItem>
-                    </MetaOverlay>
-                    {article.author && (
-                      <MetaOverlay className="right" data-glass="">
-                        <MetaItem><i className="far fa-user"></i>{article.author}</MetaItem>
-                      </MetaOverlay>
-                    )}
-                  </Cover>
-                  <Content>
-                    <Title><span className="title-text">{getLocalizedField(article.title)}</span></Title>
-                    <Summary>{getLocalizedField(article.summary)}</Summary>
-                    {article.tags && article.tags.length > 0 && (
-                      <Tags>{article.tags.slice(0, 3).map((tag) => <Tag key={tag}>{tag}</Tag>)}</Tags>
-                    )}
-                    <ReadMore className="read-more">{t('articles.readMore')}<i className="fas fa-arrow-right"></i></ReadMore>
-                  </Content>
-                  <CardFooter />
-                </Card>
-              ))}
-            </Grid>
+            {allTags.length > 0 && (
+              <TagCloud>
+                {allTags.map(tag => (
+                  <CloudTag
+                    key={tag}
+                    className={selectedTag === tag ? 'active' : ''}
+                    onClick={() => handleTagClick(tag)}
+                  >
+                    #{tag}
+                  </CloudTag>
+                ))}
+              </TagCloud>
+            )}
 
-            {totalPages > 1 && (
-              <Pagination>
-                <PaginationBtn disabled={currentPage === 1} onClick={() => goToPage(currentPage - 1)}>
-                  <i className="fas fa-chevron-left"></i><span>{t('articles.prev') || '上一页'}</span>
-                </PaginationBtn>
-                <PaginationNumbers>
-                  {visiblePages.map((page, i) => (
-                    <PaginationNum
-                      key={i}
-                      className={`${page === currentPage ? 'active' : ''}${page === '...' ? ' ellipsis' : ''}`}
-                      disabled={page === '...'}
-                      onClick={() => page !== '...' && goToPage(page as number)}
-                    >
-                      {page}
-                    </PaginationNum>
+            {filteredArticles.length === 0 ? (
+              <EmptyState>
+                <i className="fas fa-filter"></i>
+                <p>No articles found for tag #{selectedTag}</p>
+              </EmptyState>
+            ) : (
+              <>
+                <Grid>
+                  {paginatedArticles.map((article) => (
+                    <Card key={article.id} data-glass="" onClick={() => goToArticle(article.id)}>
+                      <Cover className="article-cover" style={{ backgroundImage: `url(${getArticleCover(article)})` }}>
+                        <MetaOverlay className="left" data-glass="">
+                          <MetaItem><i className="far fa-calendar"></i>{formatDate(article.date)}</MetaItem>
+                        </MetaOverlay>
+                        {article.author && (
+                          <MetaOverlay className="right" data-glass="">
+                            <MetaItem><i className="far fa-user"></i>{article.author}</MetaItem>
+                          </MetaOverlay>
+                        )}
+                      </Cover>
+                      <Content>
+                        <Title><span className="title-text">{getLocalizedField(article.title)}</span></Title>
+                        <Summary>{getLocalizedField(article.summary)}</Summary>
+                        {article.tags && article.tags.length > 0 && (
+                          <Tags>{article.tags.slice(0, 3).map((tag) => <Tag key={tag}>{tag}</Tag>)}</Tags>
+                        )}
+                        <ReadMore className="read-more">{t('articles.readMore')}<i className="fas fa-arrow-right"></i></ReadMore>
+                      </Content>
+                      <CardFooter />
+                    </Card>
                   ))}
-                </PaginationNumbers>
-                <PaginationBtn disabled={currentPage === totalPages} onClick={() => goToPage(currentPage + 1)}>
-                  <span>{t('articles.next') || '下一页'}</span><i className="fas fa-chevron-right"></i>
-                </PaginationBtn>
-              </Pagination>
+                </Grid>
+
+                {totalPages > 1 && (
+                  <Pagination>
+                    <PaginationBtn disabled={currentPage === 1} onClick={() => goToPage(currentPage - 1)}>
+                      <i className="fas fa-chevron-left"></i><span>{t('articles.prev') || '上一页'}</span>
+                    </PaginationBtn>
+                    <PaginationNumbers>
+                      {visiblePages.map((page, i) => (
+                        <PaginationNum
+                          key={i}
+                          className={`${page === currentPage ? 'active' : ''}${page === '...' ? ' ellipsis' : ''}`}
+                          disabled={page === '...'}
+                          onClick={() => page !== '...' && goToPage(page as number)}
+                        >
+                          {page}
+                        </PaginationNum>
+                      ))}
+                    </PaginationNumbers>
+                    <PaginationBtn disabled={currentPage === totalPages} onClick={() => goToPage(currentPage + 1)}>
+                      <span>{t('articles.next') || '下一页'}</span><i className="fas fa-chevron-right"></i>
+                    </PaginationBtn>
+                  </Pagination>
+                )}
+              </>
             )}
           </>
         )}

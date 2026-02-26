@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { useTheme } from '../stores/ThemeContext'
 import { useTranslation } from '../i18n/useTranslation'
-import i18n from '../i18n'
+
 
 const menuItems = [
   { key: 'home', path: '/' },
@@ -48,7 +48,6 @@ const NavLeft = styled.div`
     font-weight: bold;
     font-family: var(--site-title-font);
     color: var(--main-color);
-    mix-blend-mode: difference;
     text-decoration: none;
     transition: color 0.2s;
   }
@@ -72,8 +71,8 @@ const NavMiddle = styled.div`
     z-index: 1001;
     padding: 80px 20px 20px;
     box-sizing: border-box;
-    transition: right 0.3s ease;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+    box-shadow: none;
+    border-left: 1px solid var(--border-color);
     overflow-y: auto;
 
     &.mobile-open { right: 0; }
@@ -193,7 +192,7 @@ const NavSearch = styled.div`
     padding: 8px 12px;
     opacity: 1;
     border: 1px solid var(--border-color);
-    border-right: none;
+    background-color: transparent;
   }
 
   button {
@@ -226,70 +225,9 @@ const NavSearch = styled.div`
   }
 `
 
-const NavBtns = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
 
-  @media (max-width: 768px) {
-    gap: 4px;
-  }
-`
 
-const IconBtn = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 36px;
-  background: transparent;
-  border: none;
-  color: var(--frame-color);
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.2s;
 
-  &:hover {
-    background: var(--hover-bg);
-    color: var(--hover-color);
-  }
-`
-
-const LangDropdown = styled.ul`
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 8px;
-  list-style: none;
-  padding: 8px 0;
-  min-width: 120px;
-  border-radius: 8px;
-  overflow: hidden;
-  z-index: 100;
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border-color);
-  box-shadow: var(--glass-box-shadow);
-
-  li {
-    padding: 10px 16px;
-    cursor: pointer;
-    color: var(--frame-color);
-    transition: all 0.2s;
-
-    &:hover {
-      color: var(--hover-color);
-      background: var(--hover-bg);
-    }
-
-    &.active {
-      color: var(--accent-color);
-      font-weight: 600;
-    }
-  }
-`
 
 const MenuToggle = styled.button`
   display: none;
@@ -340,17 +278,24 @@ const MobileOverlay = styled.div`
 `
 
 export default function NavBar() {
-  const { theme, toggleTheme } = useTheme()
-  const { t, locale } = useTranslation()
+  const { theme } = useTheme()
+  const { t } = useTranslation()
 
+  const [siteTitle, setSiteTitle] = useState(t('siteName'))
   const [showSearch, setShowSearch] = useState(false)
-  const [dropdownOpen, setDropdownOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [navVisible, setNavVisible] = useState(true)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const lastScrollYRef = useRef(0)
 
-  const title = t('siteName')
+  useEffect(() => {
+    fetch('http://localhost:3001/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.siteTitle) setSiteTitle(data.siteTitle)
+      })
+      .catch(() => { })
+  }, [])
 
   const toggleSearch = useCallback(() => {
     setShowSearch((prev) => {
@@ -365,16 +310,7 @@ export default function NavBar() {
     }, 200)
   }
 
-  const toggleDropdown = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setDropdownOpen((prev) => !prev)
-  }
 
-  const handleSetLocale = (newLocale: string, e: React.MouseEvent) => {
-    e.stopPropagation()
-    i18n.changeLanguage(newLocale)
-    setDropdownOpen(false)
-  }
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen((prev) => {
@@ -408,7 +344,7 @@ export default function NavBar() {
           if (theme === 'light') {
             navBar.style.backdropFilter = 'blur(10px)'
               ; (navBar.style as any).webkitBackdropFilter = 'blur(10px)'
-            navBar.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+            navBar.style.backgroundColor = 'rgba(255, 255, 255, 0.85)'
           }
         } else {
           navBar.style.backdropFilter = 'none'
@@ -424,19 +360,13 @@ export default function NavBar() {
     return () => window.removeEventListener('scroll', updateScroll)
   }, [theme])
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (e.target instanceof Element && !e.target.closest('.lang-btn')) setDropdownOpen(false)
-    }
-    document.addEventListener('click', handleClickOutside)
-    return () => document.removeEventListener('click', handleClickOutside)
-  }, [])
+
 
   return (
     <>
       <Nav className={`nav-bar${navVisible ? '' : ' nav-hidden'}`}>
         <NavLeft>
-          <a href="/">{title}</a>
+          <a href="/">{siteTitle}</a>
         </NavLeft>
 
         <MenuToggle onClick={toggleMobileMenu}>
@@ -473,20 +403,7 @@ export default function NavBar() {
               </button>
             </form>
           </NavSearch>
-          <NavBtns>
-            <IconBtn className="lang-btn" onClick={toggleDropdown}>
-              <i className="fas fa-language"></i>
-              {dropdownOpen && (
-                <LangDropdown>
-                  <li className={locale === 'zh-CN' ? 'active' : ''} onClick={(e) => handleSetLocale('zh-CN', e)}>中文</li>
-                  <li className={locale === 'en-US' ? 'active' : ''} onClick={(e) => handleSetLocale('en-US', e)}>English</li>
-                </LangDropdown>
-              )}
-            </IconBtn>
-            <IconBtn onClick={toggleTheme}>
-              <i className={`fas ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`}></i>
-            </IconBtn>
-          </NavBtns>
+
         </NavRight>
       </Nav>
 

@@ -4,6 +4,7 @@ import Quote from '../components/Quote'
 import Social from '../components/Social'
 import ScrollArrow from '../components/ScrollArrow'
 import List from '../components/List'
+import { Helmet } from 'react-helmet-async'
 
 const HomeSection = styled.div`
   height: 100vh;
@@ -54,6 +55,9 @@ const ListSection = styled.div`
 export default function Home() {
   return (
     <>
+      <Helmet>
+        <title>Oblivion Blog - A personal space for code and life</title>
+      </Helmet>
       <HomeSection>
         <HomeBg />
         <WelcomeContent>

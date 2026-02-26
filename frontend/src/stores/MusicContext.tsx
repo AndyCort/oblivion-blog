@@ -17,7 +17,7 @@ export const useMusicContext = () => {
 };
 
 export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [isMusicVisible, setIsMusicVisible] = useState(true);
+    const [isMusicVisible, setIsMusicVisible] = useState(false);
 
     const toggleMusic = () => setIsMusicVisible(prev => !prev);
 

@@ -2,10 +2,14 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { motion, useMotionValue, useTransform, PanInfo, animate, useSpring } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHouse, faGear, faBell, faMagnifyingGlass, faStar, faHeart, faMusic } from '@fortawesome/free-solid-svg-icons';
+import { faHouse, faBell, faMagnifyingGlass, faStar, faHeart, faMusic, faMoon, faSun, faLanguage, faUser, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { faCircle } from '@fortawesome/free-regular-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import { useMusicContext } from '../stores/MusicContext';
+import { useTheme } from '../stores/ThemeContext';
+import { useAuth } from '../stores/AuthContext';
+import { useTranslation } from '../i18n/useTranslation';
+import i18n from '../i18n';
 
 // --- Constants & Config ---
 const BUTTON_SIZE = 40;
@@ -59,15 +63,17 @@ const MenuItem = styled(motion.button)`
   width: ${ITEM_SIZE}px;
   height: ${ITEM_SIZE}px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: var(--glass-bg-color);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border-color);
+  box-shadow: var(--glass-box-shadow);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--frame-color);
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: none;
   padding: 0;
   pointer-events: auto;
 `;
@@ -76,20 +82,21 @@ const TriggerButton = styled(motion.button)`
   width: ${BUTTON_SIZE}px;
   height: ${BUTTON_SIZE}px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--glass-bg-color);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border-color);
+  box-shadow: var(--glass-box-shadow);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--text-color);
   z-index: 1002;
   cursor: pointer;
   outline: none;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.35);
+    background: var(--hover-bg);
   }
 `;
 
@@ -101,6 +108,9 @@ const coreIcon = <FontAwesomeIcon icon={faCircle} size="xl" />;
 const SideButton: React.FC = () => {
     const navigate = useNavigate();
     const { toggleMusic } = useMusicContext();
+    const { theme, toggleTheme } = useTheme();
+    const { isAdmin, logout } = useAuth();
+    const { locale } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
 
     // Menu items with click handlers
@@ -123,11 +133,45 @@ const SideButton: React.FC = () => {
                 setIsOpen(false);
             }
         },
-        { id: 3, icon: <FontAwesomeIcon icon={faGear} size="xl" />, label: 'Settings' },
-        { id: 4, icon: <FontAwesomeIcon icon={faBell} size="xl" />, label: 'Notifications' },
-        { id: 5, icon: <FontAwesomeIcon icon={faMagnifyingGlass} size="xl" />, label: 'Search' },
-        { id: 6, icon: <FontAwesomeIcon icon={faStar} size="xl" />, label: 'Favorites' },
-        { id: 7, icon: <FontAwesomeIcon icon={faHeart} size="xl" />, label: 'Likes' },
+        {
+            id: 3,
+            icon: <FontAwesomeIcon icon={theme === 'dark' ? faSun : faMoon} size="xl" />,
+            label: 'Theme',
+            onClick: toggleTheme
+        },
+        {
+            id: 4,
+            icon: <FontAwesomeIcon icon={faLanguage} size="xl" />,
+            label: 'Language',
+            onClick: () => {
+                i18n.changeLanguage(locale === 'zh-CN' ? 'en-US' : 'zh-CN');
+                setIsOpen(false);
+            }
+        },
+        {
+            id: 5,
+            icon: <FontAwesomeIcon icon={isAdmin ? faSignOutAlt : faUser} size="xl" />,
+            label: isAdmin ? 'Dashboard / Logout' : 'Login',
+            onClick: () => {
+                if (isAdmin) {
+                    if (window.location.pathname.startsWith('/admin')) {
+                        if (window.confirm('Are you sure you want to logout?')) {
+                            logout();
+                            navigate('/');
+                        }
+                    } else {
+                        navigate('/admin');
+                    }
+                } else {
+                    navigate('/login');
+                }
+                setIsOpen(false);
+            }
+        },
+        { id: 6, icon: <FontAwesomeIcon icon={faBell} size="xl" />, label: 'Notifications' },
+        { id: 7, icon: <FontAwesomeIcon icon={faMagnifyingGlass} size="xl" />, label: 'Search' },
+        { id: 8, icon: <FontAwesomeIcon icon={faStar} size="xl" />, label: 'Favorites' },
+        { id: 9, icon: <FontAwesomeIcon icon={faHeart} size="xl" />, label: 'Likes' },
     ];
 
     // Rotation Logic
@@ -217,6 +261,8 @@ const SideButton: React.FC = () => {
                             icon={item.icon}
                             isOpen={isOpen}
                             onClick={item.onClick}
+                            onPan={handlePan}
+                            onPanEnd={handlePanEnd}
                         />
                     );
                 })}
@@ -239,7 +285,7 @@ const SideButton: React.FC = () => {
 
 // Subcomponent to handle individual motion value transforms
 // This avoids re-rendering the parent on every frame
-const MovingItem = ({ index, rotation, icon, isOpen, onClick }: { index: number, rotation: any, icon: any, isOpen: boolean, onClick?: () => void }) => {
+const MovingItem = ({ index, rotation, icon, isOpen, onClick, onPan, onPanEnd }: { index: number, rotation: any, icon: any, isOpen: boolean, onClick?: () => void, onPan?: any, onPanEnd?: any }) => {
     const baseAngle = 270 - (index * ITEM_SPACING); // 270, 240, 210...
 
     // Transform rotation -> x, y
@@ -285,6 +331,8 @@ const MovingItem = ({ index, rotation, icon, isOpen, onClick }: { index: number,
                 scale
             }}
             onClick={onClick}
+            onPan={onPan}
+            onPanEnd={onPanEnd}
         >
             {icon}
         </MenuItem>

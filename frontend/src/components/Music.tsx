@@ -46,13 +46,15 @@ const Widget = styled.div<{ $dragging: boolean }>`
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  box-shadow: none;
   user-select: none;
   cursor: ${(p) => (p.$dragging ? 'grabbing' : 'grab')};
-  transition: box-shadow 0.3s ease;
+  transition: border-color 0.3s;
   min-width: 140px;
 
-  &:hover { box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25); }
+  &:hover {
+    border-color: var(--main-color);
+  }
 `
 
 const Controls = styled.div`

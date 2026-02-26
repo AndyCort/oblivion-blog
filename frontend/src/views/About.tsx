@@ -1,4 +1,8 @@
+import { useState, useEffect } from 'react'
 import styled from 'styled-components'
+import MDEditor from '@uiw/react-md-editor'
+import { useTheme } from '../stores/ThemeContext'
+import { Helmet } from 'react-helmet-async'
 
 const Page = styled.div`
   min-height: 100vh;
@@ -54,20 +58,38 @@ const ContentSection = styled.section`
 `
 
 export default function About() {
-    return (
-        <Page>
-            <Container>
-                <Header>
-                    <Avatar>🧑‍💻</Avatar>
-                    <Title>关于我</Title>
-                    <Tagline>一个热爱代码与生活的开发者</Tagline>
-                </Header>
-                <ContentSection>
-                    <p>欢迎来到我的自留地。</p>
-                    <p>这里有我的碎碎念，有我的奇思妙想，还有一些奇奇怪怪的东西。</p>
-                    <p>希望你能在这里找到你想要的东西。</p>
-                </ContentSection>
-            </Container>
-        </Page>
-    )
+  const { theme } = useTheme()
+  const [settings, setSettings] = useState({
+    aboutAvatar: '🧑‍💻',
+    siteTitle: '关于我',
+    siteSubtitle: '一个热爱代码与生活的开发者',
+    aboutContent: '欢迎来到我的自留地。'
+  })
+
+  useEffect(() => {
+    fetch('http://localhost:3001/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data) setSettings(prev => ({ ...prev, ...data }))
+      })
+      .catch(() => { })
+  }, [])
+
+  return (
+    <Page>
+      <Helmet>
+        <title>关于我 | Oblivion Blog</title>
+      </Helmet>
+      <Container>
+        <Header>
+          <Avatar>{settings.aboutAvatar}</Avatar>
+          <Title>{settings.siteTitle}</Title>
+          <Tagline>{settings.siteSubtitle}</Tagline>
+        </Header>
+        <ContentSection data-color-mode={theme}>
+          <MDEditor.Markdown source={settings.aboutContent} style={{ background: 'transparent' }} />
+        </ContentSection>
+      </Container>
+    </Page>
+  )
 }
