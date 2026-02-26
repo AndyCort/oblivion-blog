@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'   # 推送 v1.0.0 这样的 tag 时触发
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
+
+      - name: Package release zip
+        run: |
+          mkdir -p release/frontend
+          # 复制后端（排除 node_modules 和 .env）
+          rsync -av --exclude='node_modules' --exclude='.env' backend/ release/backend/
+          # 复制前端构建产物
+          cp -r frontend/dist release/frontend/dist
+          # 复制部署脚本
+          cp install.sh release/install.sh
+          chmod +x release/install.sh
+          # 打包
+          cd release
+          zip -r ../oblivion-blog-${{ github.ref_name }}.zip .
+          cd ..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Oblivion Blog ${{ github.ref_name }}
+          body: |
+            ## 安装方法
+
+            1. 下载下方的 `oblivion-blog-*.zip`
+            2. 上传到 serv00 并解压
+            3. SSH 执行 `bash install.sh`
+            4. 浏览器访问 `http://你的域名:端口/install` 完成配置
+
+            > 需要提前准备好 MongoDB 连接地址（推荐 [MongoDB Atlas](https://www.mongodb.com/atlas) 免费套餐）
+          files: oblivion-blog-${{ github.ref_name }}.zip
+          draft: false
+          prerelease: false
