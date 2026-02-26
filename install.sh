@@ -5,6 +5,9 @@ echo " Oblivion Blog 安装脚本 (Serv00专版)"
 echo "=========================================="
 echo ""
 
+# 切换到脚本所在目录，防止因执行路径不对导致找不到相对目录
+cd "$(dirname "$0")" || exit 1
+
 # 检查 Node.js
 if ! command -v node &> /dev/null; then
     echo "❌ 错误: 未安装 Node.js"
