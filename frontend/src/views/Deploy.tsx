@@ -97,6 +97,36 @@ const InfoItem = styled.div`
     }
 `;
 
+
+const ButtonGroup = styled.div`
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+`;
+
+const SecondaryBtn = styled.button`
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: var(--text-color);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+        background: rgba(255,255,255,0.05);
+        color: var(--title-color);
+    }
+    
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+`;
+
 // Pill badges — use data attributes to avoid DOM prop warnings
 const GreenBadge = styled.span`
     display: inline-flex;
@@ -221,10 +251,10 @@ const StateLabel: Record<DeployState, string> = {
 };
 
 const BtnLabel: Record<DeployState, string> = {
-    idle: '🔄 从 GitHub 更新',
+    idle: '🚀 一键傻瓜式更新',
     pulling: '更新中…',
-    success: '🔄 再次更新',
-    error: '🔄 重试',
+    success: '🚀 再次一键更新',
+    error: '🔄 重试一键更新',
 };
 
 // Strip ANSI escape codes from git output
@@ -273,7 +303,7 @@ export default function Deploy() {
 
     useEffect(fetchStatus, [token]);
 
-    const handleDeploy = async () => {
+    const handleDeploy = async (foolproof: boolean = true) => {
         if (deployState === 'pulling') return;
 
         setDeployState('pulling');
@@ -286,7 +316,10 @@ export default function Deploy() {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ runInstall: false }),
+                body: JSON.stringify({
+                    installBackend: foolproof,
+                    buildFrontend: foolproof
+                }),
             });
 
             if (!response.ok || !response.body) {
@@ -344,16 +377,25 @@ export default function Deploy() {
                         <StatusDotBase className={deployState} />
                         <h2>仓库状态 — {StateLabel[deployState]}</h2>
                     </TitleRow>
-                    <DeployBtnBase
-                        className={deployState}
-                        disabled={deployState === 'pulling'}
-                        onClick={handleDeploy}
-                    >
-                        {deployState === 'pulling'
-                            ? <><Spinner />{BtnLabel[deployState]}</>
-                            : BtnLabel[deployState]
-                        }
-                    </DeployBtnBase>
+                    <ButtonGroup>
+                        <SecondaryBtn
+                            disabled={deployState === 'pulling'}
+                            onClick={() => handleDeploy(false)}
+                            title="仅拉取代码，不安装依赖或构建"
+                        >
+                            仅拉取代码
+                        </SecondaryBtn>
+                        <DeployBtnBase
+                            className={deployState}
+                            disabled={deployState === 'pulling'}
+                            onClick={() => handleDeploy(true)}
+                        >
+                            {deployState === 'pulling'
+                                ? <><Spinner />{BtnLabel[deployState]}</>
+                                : BtnLabel[deployState]
+                            }
+                        </DeployBtnBase>
+                    </ButtonGroup>
                 </CardHeader>
 
                 {statusError ? (
@@ -412,17 +454,9 @@ export default function Deploy() {
             <Card style={{ padding: '20px 28px' }}>
                 <p style={{ margin: 0, fontSize: 13, color: 'var(--text-color)', lineHeight: 1.7 }}>
                     💡 <strong style={{ color: 'var(--title-color)' }}>提示：</strong>
-                    更新代码后，如需应用前端更改，请在服务器上重新构建前端：
-                    <code style={{
-                        background: 'rgba(255,255,255,0.06)',
-                        padding: '2px 8px',
-                        borderRadius: 5,
-                        marginLeft: 6,
-                        fontFamily: 'monospace',
-                        fontSize: 12,
-                    }}>
-                        cd frontend &amp;&amp; npm run build
-                    </code>
+                    “一键傻瓜式更新”会自动帮您完成 <code style={{
+                        background: 'rgba(255,255,255,0.06)', padding: '2px 8px', borderRadius: 5, fontFamily: 'monospace', fontSize: 12
+                    }}>git pull</code>、后端安装以及前端构建的所有步骤。如果您只想拉取最新的 Markdown 文章或静态文件，可以使用“仅拉取代码”。
                 </p>
             </Card>
         </Wrap>

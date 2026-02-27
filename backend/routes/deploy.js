@@ -91,20 +91,55 @@ router.post('/pull', protect, (req, res) => {
 
             send('log', '\n✅ Code updated successfully!\n');
 
-            // Optionally run npm install in backend
-            if (req.body?.runInstall) {
-                send('log', '\n$ npm install --prefix backend\n');
-                const install = spawn('npm', ['install'], { cwd: path.join(PROJECT_ROOT, 'backend') });
-                install.stdout.on('data', d => send('log', d.toString()));
-                install.stderr.on('data', d => send('log', d.toString()));
-                install.on('close', () => {
-                    send('done', { success: true });
-                    res.end();
+            // Build task queue
+            const tasks = [];
+            if (req.body?.installBackend) {
+                tasks.push({
+                    cmd: 'npm',
+                    args: ['install'],
+                    cwd: path.join(PROJECT_ROOT, 'backend'),
+                    message: '\n$ npm install --prefix backend\n'
                 });
-            } else {
-                send('done', { success: true });
-                res.end();
             }
+            if (req.body?.buildFrontend) {
+                tasks.push({
+                    cmd: 'npm',
+                    args: ['install'],
+                    cwd: path.join(PROJECT_ROOT, 'frontend'),
+                    message: '\n$ npm install --prefix frontend\n'
+                });
+                tasks.push({
+                    cmd: 'npm',
+                    args: ['run', 'build'],
+                    cwd: path.join(PROJECT_ROOT, 'frontend'),
+                    message: '\n$ npm run build --prefix frontend\n'
+                });
+            }
+
+            const runNextTask = () => {
+                if (tasks.length === 0) {
+                    send('done', { success: true });
+                    return res.end();
+                }
+
+                const task = tasks.shift();
+                send('log', task.message);
+                const proc = spawn(task.cmd, task.args, { cwd: task.cwd });
+
+                proc.stdout.on('data', d => send('log', d.toString()));
+                proc.stderr.on('data', d => send('log', d.toString()));
+
+                proc.on('close', (code) => {
+                    if (code !== 0) {
+                        send('log', `\n❌ Command failed (exit ${code}): ${task.cmd} ${task.args.join(' ')}\n`);
+                        send('done', { success: false });
+                        return res.end();
+                    }
+                    runNextTask();
+                });
+            };
+
+            runNextTask();
         });
     });
 

@@ -338,20 +338,6 @@ export default function NavBar() {
         setNavVisible(true)
       }
 
-      const navBar = document.querySelector('.nav-bar') as HTMLElement
-      if (navBar) {
-        if (scrollY > 0) {
-          if (theme === 'light') {
-            navBar.style.backdropFilter = 'blur(10px)'
-              ; (navBar.style as any).webkitBackdropFilter = 'blur(10px)'
-            navBar.style.backgroundColor = 'rgba(255, 255, 255, 0.85)'
-          }
-        } else {
-          navBar.style.backdropFilter = 'none'
-            ; (navBar.style as any).webkitBackdropFilter = 'none'
-          navBar.style.backgroundColor = ''
-        }
-      }
 
       lastScrollYRef.current = scrollY
     }
