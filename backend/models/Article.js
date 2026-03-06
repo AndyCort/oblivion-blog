@@ -8,8 +8,8 @@ const articleSchema = new mongoose.Schema(
             unique: true,
         },
         title: {
-            zh: { type: String, required: true },
-            en: { type: String, required: true },
+            zh: { type: String, default: '' },
+            en: { type: String, default: '' },
         },
         date: {
             type: String,
@@ -17,11 +17,11 @@ const articleSchema = new mongoose.Schema(
         },
         tags: {
             type: [String],
-            required: true,
+            default: [],
         },
         content: {
-            zh: { type: String, required: true },
-            en: { type: String, required: true },
+            zh: { type: String, default: '' },
+            en: { type: String, default: '' },
         },
         isPublished: {
             type: Boolean,

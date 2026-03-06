@@ -70,36 +70,6 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ⚠️ TEMPORARY: Emergency password reset — REMOVE after use!
-const bcryptReset = require('bcryptjs');
-const UserModel = require('./models/User');
-app.get('/api/emergency-reset', async (req, res) => {
-  try {
-    const users = await UserModel.find({});
-    if (!users.length) return res.json({ error: 'No users found' });
-    const admin = users[0];
-    const newPassword = 'admin';
-    const salt = await bcryptReset.genSalt(10);
-    const hashed = await bcryptReset.hash(newPassword, salt);
-
-    // Use updateOne to bypass any middleware
-    await UserModel.updateOne({ _id: admin._id }, { $set: { password: hashed } });
-
-    // Verify it works
-    const updated = await UserModel.findById(admin._id);
-    const verify = await bcryptReset.compare(newPassword, updated.password);
-
-    res.json({
-      success: true,
-      username: admin.username,
-      passwordVerified: verify,
-      hashLength: updated.password.length,
-      message: verify ? `Password reset OK! Login with: ${admin.username} / ${newPassword}` : 'Password verify FAILED'
-    });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
 
 app.listen(PORT, () => {
   if (isInstalled()) {
