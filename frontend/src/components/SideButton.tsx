@@ -53,6 +53,7 @@ const InteractionZone = styled(motion.div)`
   border-radius: 100% 0 0 0;
   cursor: grab;
   pointer-events: auto;
+  touch-action: none;
   &:active {
     cursor: grabbing;
   }
@@ -76,6 +77,7 @@ const MenuItem = styled(motion.button)`
   box-shadow: none;
   padding: 0;
   pointer-events: auto;
+  touch-action: none;
 `;
 
 const TriggerButton = styled(motion.button)`
