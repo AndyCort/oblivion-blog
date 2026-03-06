@@ -17,6 +17,9 @@ const connectDB = async (uri) => {
     }
 
     try {
+        // Debug: show masked URI to verify env var is correct
+        const masked = target.replace(/:([^@]+)@/, ':****@');
+        console.log(`Connecting to MongoDB: ${masked}`);
         const conn = await mongoose.connect(target);
         console.log(`MongoDB Connected: ${conn.connection.host}`);
     } catch (error) {
