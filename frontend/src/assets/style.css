@@ -51,7 +51,7 @@
     /* 字体 - 英文字体在前，中文字体在后，浏览器会自动按需选择 */
     --site-title-font: 'Nunito', 'TianTianQuan', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
     --title-font: 'Nunito', 'Lai', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    --content-font: 'Nunito', 'LXGWWenKai', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    --content-font: 'Nunito', 'LXGW WenKai', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 
     /* 安全区域 */
     --safe-area-inset-top: env(safe-area-inset-top, 0px);
@@ -95,30 +95,33 @@
 }
 
 /* ===== 字体定义 ===== */
+/* Nunito (424KB) - local */
 @font-face {
     font-family: 'Nunito';
     src: url('./fonts/Nunito.ttf') format('truetype');
+    font-display: swap;
 }
 
+/* Lai (31MB) - too large for Cloudflare, loaded from GitHub via jsDelivr */
 @font-face {
     font-family: 'Lai';
-    src: url('./fonts/Lai.ttf') format('truetype');
+    src: url('https://cdn.jsdelivr.net/gh/AndyCort/oblivion-blog@main/frontend/src/assets/fonts/Lai.ttf') format('truetype');
+    font-display: swap;
 }
 
 @font-face {
     font-family: 'Ye-xingkai';
     src: url('./fonts/Ye-xingkai.ttf') format('truetype');
+    font-display: swap;
 }
 
 @font-face {
     font-family: 'TianTianQuan';
     src: url('./fonts/TianTianQuan.ttf') format('truetype');
+    font-display: swap;
 }
 
-@font-face {
-    font-family: 'LXGWWenKai';
-    src: url('./fonts/LXGWWenKai.ttf') format('truetype');
-}
+/* LXGWWenKai: loaded via CDN <link> in index.html (split woff2 subset) */
 
 
 
