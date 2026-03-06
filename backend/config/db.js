@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 /**
- * Connect to MongoDB.
+ * Connect to MongoDB with auto-retry.
  * @param {string} [uri] - Optional URI to connect to. Falls back to process.env.MONGO_URI.
  */
 const connectDB = async (uri) => {
@@ -16,16 +16,27 @@ const connectDB = async (uri) => {
         return;
     }
 
-    try {
-        // Debug: show masked URI to verify env var is correct
-        const masked = target.replace(/:([^@]+)@/, ':****@');
-        console.log(`Connecting to MongoDB: ${masked}`);
-        const conn = await mongoose.connect(target);
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
-    } catch (error) {
-        console.error(`DB Connection Error: ${error.message}`);
-        // Don't crash — let the server keep running so it can return proper errors
+    const masked = target.replace(/:([^@]+)@/, ':****@');
+    const MAX_RETRIES = 5;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            console.log(`[Attempt ${attempt}/${MAX_RETRIES}] Connecting to MongoDB: ${masked}`);
+            const conn = await mongoose.connect(target, {
+                serverSelectionTimeoutMS: 10000,
+            });
+            console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+            return; // success
+        } catch (error) {
+            console.error(`❌ DB Connection Error (attempt ${attempt}): ${error.message}`);
+            if (attempt < MAX_RETRIES) {
+                const delay = attempt * 3000; // 3s, 6s, 9s, 12s, 15s
+                console.log(`   Retrying in ${delay / 1000}s...`);
+                await new Promise(r => setTimeout(r, delay));
+            }
+        }
     }
+    console.error('❌ All MongoDB connection attempts failed. Server will run without DB.');
 };
 
 module.exports = connectDB;
