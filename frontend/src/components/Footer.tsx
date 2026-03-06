@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import styled from 'styled-components'
+import { API_BASE } from '../api/config'
 
 const FooterWrapper = styled.footer`
   text-align: center;
@@ -21,7 +22,7 @@ export default function Footer() {
   const [footerText, setFooterText] = useState('© 2026 Oblivion Blog. All rights reserved.')
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/settings')
+    fetch(`${API_BASE}/api/settings`)
       .then(res => res.json())
       .then(data => {
         if (data && data.footerText) setFooterText(data.footerText)

@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:3001/api';
+import { API_BASE } from './config';
+
+const API_URL = `${API_BASE}/api`;
 
 export const checkInstallStatus = async (): Promise<{ installed: boolean }> => {
     const res = await fetch(`${API_URL}/install/status`);

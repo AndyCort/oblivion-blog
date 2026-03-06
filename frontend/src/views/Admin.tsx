@@ -3,6 +3,7 @@ import styled, { keyframes } from 'styled-components';
 import { useAuth } from '../stores/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Settings from './Settings';
+import { API_BASE } from '../api/config';
 
 const AdminContainer = styled.div`
   padding: 100px 24px 40px;
@@ -361,7 +362,7 @@ export default function Admin() {
     setShowLog(true);
     const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '').replace(/\r/g, '');
     try {
-      const res = await fetch('http://localhost:3001/api/deploy/pull', {
+      const res = await fetch(`${API_BASE}/api/deploy/pull`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
@@ -402,7 +403,7 @@ export default function Admin() {
 
   const fetchArticles = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/articles/all', {
+      const response = await fetch(`${API_BASE}/api/articles/all`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -420,7 +421,7 @@ export default function Admin() {
     if (!window.confirm('Are you sure you want to delete this article?')) return;
 
     try {
-      const response = await fetch(`http://localhost:3001/api/articles/${id}`, {
+      const response = await fetch(`${API_BASE}/api/articles/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

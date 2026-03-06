@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../stores/AuthContext';
 import { useTheme } from '../stores/ThemeContext';
 import MDEditor from '@uiw/react-md-editor';
+import { API_BASE } from '../api/config';
 
 const SettingsContainer = styled.div`
   padding: 100px 24px 40px;
@@ -142,7 +143,7 @@ export default function Settings({ isTab = false }: { isTab?: boolean }) {
 
     const fetchSettings = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/settings');
+            const response = await fetch(`${API_BASE}/api/settings`);
             if (response.ok) {
                 const data = await response.json();
                 if (data) {
@@ -173,7 +174,7 @@ export default function Settings({ isTab = false }: { isTab?: boolean }) {
         setMessage({ type: '', text: '' });
 
         try {
-            const response = await fetch('http://localhost:3001/api/settings', {
+            const response = await fetch(`${API_BASE}/api/settings`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

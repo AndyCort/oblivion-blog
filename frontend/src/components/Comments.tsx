@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from '../i18n/useTranslation';
+import { API_BASE } from '../api/config';
 
 const CommentsContainer = styled.div`
   margin-top: 40px;
@@ -139,132 +140,132 @@ const EmptyComments = styled.div`
 
 
 interface CommentType {
-    _id: string;
-    author: string;
-    content: string;
-    date: string;
+  _id: string;
+  author: string;
+  content: string;
+  date: string;
 }
 
 interface CommentsProps {
-    articleId: string;
+  articleId: string;
 }
 
 export default function Comments({ articleId }: CommentsProps) {
-    const { locale } = useTranslation();
-    const [comments, setComments] = useState<CommentType[]>([]);
-    const [author, setAuthor] = useState('');
-    const [content, setContent] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState('');
+  const { locale } = useTranslation();
+  const [comments, setComments] = useState<CommentType[]>([]);
+  const [author, setAuthor] = useState('');
+  const [content, setContent] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-    useEffect(() => {
-        fetchComments();
-    }, [articleId]);
+  useEffect(() => {
+    fetchComments();
+  }, [articleId]);
 
-    const fetchComments = async () => {
-        try {
-            const res = await fetch(`http://localhost:3001/api/comments/${articleId}`);
-            if (res.ok) {
-                const data = await res.json();
-                setComments(data);
-            }
-        } catch (err) {
-            console.error('Failed to load comments');
-        }
-    };
+  const fetchComments = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/comments/${articleId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setComments(data);
+      }
+    } catch (err) {
+      console.error('Failed to load comments');
+    }
+  };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!content.trim()) return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!content.trim()) return;
 
-        setIsSubmitting(true);
-        setError('');
+    setIsSubmitting(true);
+    setError('');
 
-        try {
-            const res = await fetch('http://localhost:3001/api/comments', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    articleId,
-                    author: author.trim() || 'Anonymous',
-                    content: content.trim()
-                })
-            });
+    try {
+      const res = await fetch(`${API_BASE}/api/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          articleId,
+          author: author.trim() || 'Anonymous',
+          content: content.trim()
+        })
+      });
 
-            if (!res.ok) throw new Error('Failed to post comment');
+      if (!res.ok) throw new Error('Failed to post comment');
 
-            const newComment = await res.json();
-            setComments([newComment, ...comments]);
-            setAuthor('');
-            setContent('');
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+      const newComment = await res.json();
+      setComments([newComment, ...comments]);
+      setAuthor('');
+      setContent('');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString(locale === 'zh-CN' ? 'zh-CN' : 'en-US', {
-            year: 'numeric', month: 'short', day: 'numeric',
-            hour: '2-digit', minute: '2-digit'
-        });
-    };
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString(locale === 'zh-CN' ? 'zh-CN' : 'en-US', {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  };
 
-    return (
-        <CommentsContainer>
-            <Title>{locale === 'zh-CN' ? '评论' : 'Comments'} ({comments.length})</Title>
+  return (
+    <CommentsContainer>
+      <Title>{locale === 'zh-CN' ? '评论' : 'Comments'} ({comments.length})</Title>
 
-            <CommentForm onSubmit={handleSubmit}>
-                {error && <div style={{ color: '#ff4d4f', fontSize: '14px' }}>{error}</div>}
+      <CommentForm onSubmit={handleSubmit}>
+        {error && <div style={{ color: '#ff4d4f', fontSize: '14px' }}>{error}</div>}
 
-                <FormGroup>
-                    <label>{locale === 'zh-CN' ? '昵称 (选填)' : 'Name (Optional)'}</label>
-                    <input
-                        type="text"
-                        value={author}
-                        onChange={(e) => setAuthor(e.target.value)}
-                        placeholder={locale === 'zh-CN' ? '匿名前辈' : 'Anonymous'}
-                        maxLength={30}
-                    />
-                </FormGroup>
+        <FormGroup>
+          <label>{locale === 'zh-CN' ? '昵称 (选填)' : 'Name (Optional)'}</label>
+          <input
+            type="text"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            placeholder={locale === 'zh-CN' ? '匿名前辈' : 'Anonymous'}
+            maxLength={30}
+          />
+        </FormGroup>
 
-                <FormGroup>
-                    <label>{locale === 'zh-CN' ? '评论内容' : 'Comment'}</label>
-                    <textarea
-                        required
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder={locale === 'zh-CN' ? '写下你的想法...' : 'Leave your thoughts here...'}
-                        maxLength={1000}
-                    />
-                </FormGroup>
+        <FormGroup>
+          <label>{locale === 'zh-CN' ? '评论内容' : 'Comment'}</label>
+          <textarea
+            required
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder={locale === 'zh-CN' ? '写下你的想法...' : 'Leave your thoughts here...'}
+            maxLength={1000}
+          />
+        </FormGroup>
 
-                <SubmitButton type="submit" disabled={isSubmitting || !content.trim()}>
-                    {isSubmitting
-                        ? (locale === 'zh-CN' ? '提交中...' : 'Submitting...')
-                        : (locale === 'zh-CN' ? '发送评论' : 'Post Comment')
-                    }
-                </SubmitButton>
-            </CommentForm>
+        <SubmitButton type="submit" disabled={isSubmitting || !content.trim()}>
+          {isSubmitting
+            ? (locale === 'zh-CN' ? '提交中...' : 'Submitting...')
+            : (locale === 'zh-CN' ? '发送评论' : 'Post Comment')
+          }
+        </SubmitButton>
+      </CommentForm>
 
-            <CommentList>
-                {comments.length === 0 ? (
-                    <EmptyComments>
-                        {locale === 'zh-CN' ? '暂时还没有评论，来做第一个留言的人吧！' : 'No comments yet. Be the first to share your thoughts!'}
-                    </EmptyComments>
-                ) : (
-                    comments.map(comment => (
-                        <CommentItem key={comment._id}>
-                            <CommentHeader>
-                                <strong><i className="fas fa-user-circle"></i>{comment.author}</strong>
-                                <span>{formatDate(comment.date)}</span>
-                            </CommentHeader>
-                            <CommentContent>{comment.content}</CommentContent>
-                        </CommentItem>
-                    ))
-                )}
-            </CommentList>
-        </CommentsContainer>
-    );
+      <CommentList>
+        {comments.length === 0 ? (
+          <EmptyComments>
+            {locale === 'zh-CN' ? '暂时还没有评论，来做第一个留言的人吧！' : 'No comments yet. Be the first to share your thoughts!'}
+          </EmptyComments>
+        ) : (
+          comments.map(comment => (
+            <CommentItem key={comment._id}>
+              <CommentHeader>
+                <strong><i className="fas fa-user-circle"></i>{comment.author}</strong>
+                <span>{formatDate(comment.date)}</span>
+              </CommentHeader>
+              <CommentContent>{comment.content}</CommentContent>
+            </CommentItem>
+          ))
+        )}
+      </CommentList>
+    </CommentsContainer>
+  );
 }

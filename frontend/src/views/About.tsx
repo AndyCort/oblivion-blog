@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import MDEditor from '@uiw/react-md-editor'
 import { useTheme } from '../stores/ThemeContext'
 import { Helmet } from 'react-helmet-async'
+import { API_BASE } from '../api/config'
 
 const Page = styled.div`
   min-height: 100vh;
@@ -67,7 +68,7 @@ export default function About() {
   })
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/settings')
+    fetch(`${API_BASE}/api/settings`)
       .then(res => res.json())
       .then(data => {
         if (data) setSettings(prev => ({ ...prev, ...data }))

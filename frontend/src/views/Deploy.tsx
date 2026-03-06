@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useAuth } from '../stores/AuthContext';
+import { API_BASE } from '../api/config';
 
-const API = 'http://localhost:3001/api';
+const API = `${API_BASE}/api`;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface GitStatus {

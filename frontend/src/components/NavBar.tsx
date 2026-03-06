@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { useTheme } from '../stores/ThemeContext'
 import { useTranslation } from '../i18n/useTranslation'
+import { API_BASE } from '../api/config'
 
 
 const menuItems = [
@@ -289,7 +290,7 @@ export default function NavBar() {
   const lastScrollYRef = useRef(0)
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/settings')
+    fetch(`${API_BASE}/api/settings`)
       .then(res => res.json())
       .then(data => {
         if (data && data.siteTitle) setSiteTitle(data.siteTitle)

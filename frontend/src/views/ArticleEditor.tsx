@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../stores/AuthContext';
 import { useTheme } from '../stores/ThemeContext';
 import MDEditor from '@uiw/react-md-editor';
+import { API_BASE } from '../api/config';
 const EditorContainer = styled.div`
   padding: 100px 24px 40px;
   max-width: 800px;
@@ -256,7 +257,7 @@ export default function ArticleEditor() {
 
     const fetchArticle = async () => {
         try {
-            const response = await fetch(`http://localhost:3001/api/articles/${id}`);
+            const response = await fetch(`${API_BASE}/api/articles/${id}`);
             if (!response.ok) throw new Error('Failed to fetch article');
 
             const data = await response.json();
@@ -295,7 +296,7 @@ export default function ArticleEditor() {
         formDataPayload.append('image', file);
 
         try {
-            const response = await fetch('http://localhost:3001/api/upload', {
+            const response = await fetch(`${API_BASE}/api/upload`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -344,8 +345,8 @@ export default function ArticleEditor() {
             };
 
             const url = isEditMode
-                ? `http://localhost:3001/api/articles/${id}`
-                : 'http://localhost:3001/api/articles';
+                ? `${API_BASE}/api/articles/${id}`
+                : `${API_BASE}/api/articles`;
 
             const method = isEditMode ? 'PUT' : 'POST';
 
