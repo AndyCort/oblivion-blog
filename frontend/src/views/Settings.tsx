@@ -118,12 +118,20 @@ const SuccessMessage = styled.div`
 
 export default function Settings({ isTab = false }: { isTab?: boolean }) {
     const navigate = useNavigate();
-    const { isAdmin, token } = useAuth();
+    const { isAdmin, token, login } = useAuth();
     const { theme } = useTheme();
 
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
+
+    const [isCredSaving, setIsCredSaving] = useState(false);
+    const [credMessage, setCredMessage] = useState({ type: '', text: '' });
+    const [credFormData, setCredFormData] = useState({
+        currentPassword: '',
+        newUsername: '',
+        newPassword: ''
+    });
 
     const [formData, setFormData] = useState({
         siteTitle: '',
@@ -160,6 +168,46 @@ export default function Settings({ isTab = false }: { isTab?: boolean }) {
             console.error('Failed to fetch settings');
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleCredChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setCredFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleCredSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!credFormData.currentPassword) {
+            setCredMessage({ type: 'error', text: 'Current password is required.' });
+            return;
+        }
+        setIsCredSaving(true);
+        setCredMessage({ type: '', text: '' });
+
+        try {
+            const response = await fetch(`${API_BASE}/api/auth/credentials`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(credFormData)
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to update credentials');
+            }
+
+            setCredMessage({ type: 'success', text: 'Credentials updated successfully!' });
+            login(data.token);
+            setCredFormData({ currentPassword: '', newUsername: '', newPassword: '' });
+            setTimeout(() => setCredMessage({ type: '', text: '' }), 3000);
+        } catch (err: any) {
+            setCredMessage({ type: 'error', text: err.message });
+        } finally {
+            setIsCredSaving(false);
         }
     };
 
@@ -272,6 +320,50 @@ export default function Settings({ isTab = false }: { isTab?: boolean }) {
 
                 <SubmitButton type="submit" disabled={isSaving}>
                     {isSaving ? 'Saving...' : 'Save Settings'}
+                </SubmitButton>
+            </SettingsForm>
+
+            <SettingsForm onSubmit={handleCredSubmit} style={{ marginTop: '20px' }}>
+                <h3>Admin Credentials</h3>
+                {credMessage.type === 'error' && <ErrorMessage>{credMessage.text}</ErrorMessage>}
+                {credMessage.type === 'success' && <SuccessMessage>{credMessage.text}</SuccessMessage>}
+
+                <FormGroup>
+                    <label>Current Password (Required)</label>
+                    <input
+                        required
+                        type="password"
+                        name="currentPassword"
+                        value={credFormData.currentPassword}
+                        onChange={handleCredChange}
+                        placeholder="Enter current password to authorize changes"
+                    />
+                </FormGroup>
+
+                <FormGroup>
+                    <label>New Username (Optional)</label>
+                    <input
+                        type="text"
+                        name="newUsername"
+                        value={credFormData.newUsername}
+                        onChange={handleCredChange}
+                        placeholder="Leave blank to keep current username"
+                    />
+                </FormGroup>
+
+                <FormGroup>
+                    <label>New Password (Optional)</label>
+                    <input
+                        type="password"
+                        name="newPassword"
+                        value={credFormData.newPassword}
+                        onChange={handleCredChange}
+                        placeholder="Leave blank to keep current password"
+                    />
+                </FormGroup>
+
+                <SubmitButton type="submit" disabled={isCredSaving}>
+                    {isCredSaving ? 'Updating...' : 'Update Credentials'}
                 </SubmitButton>
             </SettingsForm>
         </SettingsContainer>
