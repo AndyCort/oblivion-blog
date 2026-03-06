@@ -1,10 +1,13 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import styled, { keyframes } from 'styled-components'
 import { Helmet } from 'react-helmet-async'
+import MDEditor from '@uiw/react-md-editor'
 import { useTranslation } from '../i18n/useTranslation'
+import { useTheme } from '../stores/ThemeContext'
 import { fetchArticle, type Article } from '../api/articles'
 import Comments from '../components/Comments'
+import TableOfContents, { extractHeadings } from '../components/TableOfContents'
 
 const adSpin = keyframes`
 to { 
@@ -12,15 +15,29 @@ to {
 }
 `
 
-const Wrapper = styled.div`
+/* ── Layout: wider wrapper with flex for sidebar ── */
+const PageWrapper = styled.div`
   min-height: 100vh;
   padding: 100px 20px 60px;
-  max-width: 800px;
+  max-width: 1120px;
   margin: 0 auto;
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
 
-  @media (max-width: 768px) {
-    padding: 80px 16px 40px; 
+  @media (max-width: 1200px) {
+    max-width: 800px;
+    gap: 0;
   }
+  @media (max-width: 768px) {
+    padding: 80px 16px 40px;
+  }
+`
+
+const MainColumn = styled.div`
+  flex: 1;
+  min-width: 0;
+  max-width: 800px;
 `
 
 const LoadingBox = styled.div`
@@ -71,7 +88,7 @@ const ErrorBox = styled.div`
   }
 `
 
-const Article = styled.article`
+const ArticleCard = styled.article`
   border: 1px solid var(--glass-border-color);
   border-radius: 16px;
 `
@@ -136,7 +153,6 @@ const Body = styled.div`
   color: var(--text-color);
   font-size: 1.1rem;
   line-height: 1.8;
-  p { margin: 0; white-space: pre-wrap; }
   @media (max-width: 768px) { padding: 20px; font-size: 1rem; }
 `
 
@@ -165,6 +181,7 @@ export default function ArticleView() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { locale } = useTranslation()
+  const { theme } = useTheme()
 
   const [article, setArticle] = useState<Article | null>(null)
   const [loading, setLoading] = useState(true)
@@ -201,30 +218,59 @@ export default function ArticleView() {
     return () => { cancelled = true }
   }, [id])
 
-  if (loading) return <Wrapper><LoadingBox><Spinner /><span>加载中...</span></LoadingBox></Wrapper>
-  if (error) return <Wrapper><ErrorBox><i className="far fa-face-sad-tear" /><p>文章加载失败</p><button onClick={() => navigate('/')}>返回首页</button></ErrorBox></Wrapper>
+  const contentText = useMemo(
+    () => (article ? getLocalizedField(article.content) : ''),
+    [article, getLocalizedField]
+  )
+
+  const headings = useMemo(() => extractHeadings(contentText), [contentText])
+
+  if (loading) return (
+    <PageWrapper>
+      <MainColumn>
+        <LoadingBox><Spinner /><span>加载中...</span></LoadingBox>
+      </MainColumn>
+    </PageWrapper>
+  )
+  if (error) return (
+    <PageWrapper>
+      <MainColumn>
+        <ErrorBox>
+          <i className="far fa-face-sad-tear" />
+          <p>文章加载失败</p>
+          <button onClick={() => navigate('/')}>返回首页</button>
+        </ErrorBox>
+      </MainColumn>
+    </PageWrapper>
+  )
   if (!article) return null
 
   return (
-    <Wrapper>
-      <Helmet>
-        <title>{getLocalizedField(article.title)} | Oblivion Blog</title>
-      </Helmet>
-      <Article data-glass="">
-        <ArticleHeader>
-          <ArticleTitle>{getLocalizedField(article.title)}</ArticleTitle>
-          <Meta>
-            <MetaItem><i className="far fa-calendar" />{formatDate(article.date)}</MetaItem>
-            {article.author && <MetaItem><i className="far fa-user" />{article.author}</MetaItem>}
-          </Meta>
-          {article.tags && article.tags.length > 0 && <TagsRow>{article.tags.map((tag) => <Tag key={tag}>{tag}</Tag>)}</TagsRow>}
-        </ArticleHeader>
-        {article.cover && <CoverImg><img src={article.cover} alt={getLocalizedField(article.title)} /></CoverImg>}
-        <Body><p>{getLocalizedField(article.content)}</p></Body>
-        <FooterSection><BackBtn onClick={() => navigate(-1)}><i className="fas fa-arrow-left" />返回</BackBtn></FooterSection>
-      </Article>
+    <PageWrapper>
+      <MainColumn>
+        <Helmet>
+          <title>{getLocalizedField(article.title)} | Oblivion Blog</title>
+        </Helmet>
+        <ArticleCard data-glass="">
+          <ArticleHeader>
+            <ArticleTitle>{getLocalizedField(article.title)}</ArticleTitle>
+            <Meta>
+              <MetaItem><i className="far fa-calendar" />{formatDate(article.date)}</MetaItem>
+              {article.author && <MetaItem><i className="far fa-user" />{article.author}</MetaItem>}
+            </Meta>
+            {article.tags && article.tags.length > 0 && <TagsRow>{article.tags.map((tag) => <Tag key={tag}>{tag}</Tag>)}</TagsRow>}
+          </ArticleHeader>
+          {article.cover && <CoverImg><img src={article.cover} alt={getLocalizedField(article.title)} /></CoverImg>}
+          <Body className="article-markdown-body" data-color-mode={theme}>
+            <MDEditor.Markdown source={contentText} style={{ background: 'transparent' }} />
+          </Body>
+          <FooterSection><BackBtn onClick={() => navigate(-1)}><i className="fas fa-arrow-left" />返回</BackBtn></FooterSection>
+        </ArticleCard>
 
-      {id && <Comments articleId={id} />}
-    </Wrapper>
+        {id && <Comments articleId={id} />}
+      </MainColumn>
+
+      <TableOfContents headings={headings} />
+    </PageWrapper>
   )
 }

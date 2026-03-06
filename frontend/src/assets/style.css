@@ -143,3 +143,146 @@
         backdrop-filter: blur(10px);
     }
 }
+
+/* ===== Markdown Article Body ===== */
+.article-markdown-body .wmde-markdown {
+    background: transparent !important;
+    color: var(--text-color) !important;
+    font-family: var(--content-font) !important;
+    font-size: 1.05rem;
+    line-height: 1.85;
+}
+
+.article-markdown-body .wmde-markdown h1,
+.article-markdown-body .wmde-markdown h2,
+.article-markdown-body .wmde-markdown h3,
+.article-markdown-body .wmde-markdown h4,
+.article-markdown-body .wmde-markdown h5,
+.article-markdown-body .wmde-markdown h6 {
+    color: var(--text-color);
+    font-family: var(--title-font);
+    margin-top: 1.6em;
+    margin-bottom: 0.6em;
+    border-bottom: none;
+    scroll-margin-top: 100px;
+}
+
+.article-markdown-body .wmde-markdown h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.article-markdown-body .wmde-markdown h2 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid var(--glass-border-color);
+}
+
+.article-markdown-body .wmde-markdown h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* Links */
+.article-markdown-body .wmde-markdown a {
+    color: var(--main-color);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.article-markdown-body .wmde-markdown a:hover {
+    border-bottom-color: var(--main-color);
+}
+
+/* Inline code */
+.article-markdown-body .wmde-markdown code:not(pre code) {
+    background: rgba(127, 127, 127, 0.12);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: var(--main-color);
+}
+
+/* Code blocks */
+.article-markdown-body .wmde-markdown pre {
+    background: rgba(0, 0, 0, 0.25) !important;
+    border: 1px solid var(--glass-border-color);
+    border-radius: 10px;
+    padding: 16px;
+    overflow-x: auto;
+    margin: 1.2em 0;
+}
+
+.article-markdown-body .wmde-markdown pre code {
+    background: none !important;
+    color: var(--text-color);
+    font-size: 0.88rem;
+    line-height: 1.65;
+}
+
+/* Blockquotes */
+.article-markdown-body .wmde-markdown blockquote {
+    border-left: 3px solid var(--main-color);
+    margin: 1.4em 0;
+    padding: 8px 16px;
+    background: rgba(127, 127, 127, 0.06);
+    border-radius: 0 8px 8px 0;
+    color: var(--text-color);
+    opacity: 0.85;
+}
+
+/* Tables */
+.article-markdown-body .wmde-markdown table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1.4em 0;
+    font-size: 0.95rem;
+}
+
+.article-markdown-body .wmde-markdown table th,
+.article-markdown-body .wmde-markdown table td {
+    border: 1px solid var(--glass-border-color);
+    padding: 10px 14px;
+    text-align: left;
+}
+
+.article-markdown-body .wmde-markdown table th {
+    background: rgba(127, 127, 127, 0.1);
+    font-weight: 600;
+}
+
+.article-markdown-body .wmde-markdown table tr:nth-child(even) {
+    background: rgba(127, 127, 127, 0.04);
+}
+
+/* Images */
+.article-markdown-body .wmde-markdown img {
+    max-width: 100%;
+    border-radius: 10px;
+    margin: 1em 0;
+}
+
+/* Horizontal rules */
+.article-markdown-body .wmde-markdown hr {
+    border: none;
+    border-top: 1px solid var(--glass-border-color);
+    margin: 2em 0;
+}
+
+/* Lists */
+.article-markdown-body .wmde-markdown ul,
+.article-markdown-body .wmde-markdown ol {
+    padding-left: 1.6em;
+    margin: 0.8em 0;
+}
+
+.article-markdown-body .wmde-markdown li {
+    margin: 0.3em 0;
+}
+
+/* Paragraphs */
+.article-markdown-body .wmde-markdown p {
+    margin: 0.8em 0;
+}
