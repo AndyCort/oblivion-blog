@@ -9,7 +9,7 @@ const resetPassword = async () => {
     try {
         console.log(`Connecting to database at ${uri.replace(/:([^@]+)@/, ':****@')} ...`);
         await mongoose.connect(uri);
-        console.log('Connected!');
+        console.log('Connected! ');
 
         const UserSchema = new mongoose.Schema({
             username: { type: String, required: true },

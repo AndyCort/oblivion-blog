@@ -101,6 +101,7 @@ const NavMenu = styled.ul`
     text-decoration: none;
     transition: color 0.2s;
     position: relative;
+    font-family: var(--content-font);
 
     &:hover, &.active { color: var(--main-color); }
 
