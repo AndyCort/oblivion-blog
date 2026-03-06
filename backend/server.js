@@ -70,6 +70,23 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// ⚠️ TEMPORARY: Emergency password reset — REMOVE after use!
+const bcryptReset = require('bcryptjs');
+const UserModel = require('./models/User');
+app.get('/api/emergency-reset', async (req, res) => {
+  try {
+    const users = await UserModel.find({});
+    if (!users.length) return res.json({ error: 'No users found' });
+    const admin = users[0];
+    const salt = await bcryptReset.genSalt(10);
+    admin.password = await bcryptReset.hash('admin', salt);
+    await admin.save();
+    res.json({ success: true, message: `Password reset for user "${admin.username}" to: admin` });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.listen(PORT, () => {
   if (isInstalled()) {
     console.log(`✅ Server running on http://localhost:${PORT} (installed)`);
