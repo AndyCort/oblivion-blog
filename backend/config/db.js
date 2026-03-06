@@ -17,6 +17,11 @@ const connectDB = async (uri) => {
     }
 
     const masked = target.replace(/:([^@]+)@/, ':****@');
+    // Extract username and password for debugging
+    const match = target.match(/\/\/([^:]+):([^@]+)@/);
+    if (match) {
+        console.log(`DB User: "${match[1]}", Password length: ${match[2].length}, Password starts with: "${match[2].substring(0, 3)}..."`);
+    }
     const MAX_RETRIES = 5;
 
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
