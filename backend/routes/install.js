@@ -9,6 +9,8 @@ const ENV_PATH = path.join(__dirname, '../.env');
 
 // Helper: check if .env exists and has been configured by the installer
 const isInstalled = () => {
+    // Support cloud platforms (e.g. Render) where env vars are set via dashboard
+    if (process.env.INSTALLED === 'true') return true;
     if (!fs.existsSync(ENV_PATH)) return false;
     const content = fs.readFileSync(ENV_PATH, 'utf-8');
     return content.includes('INSTALLED=true');
