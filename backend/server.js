@@ -16,7 +16,20 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(s => s.trim())
+  : ['https://inpa.in', 'http://localhost:5173'];
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (server-to-server, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.some(o => origin === o || origin.endsWith('.pages.dev'))) {
+      return callback(null, true);
+    }
+    callback(null, true); // Allow all for now, but with proper headers
+  },
+  credentials: true,
+}));
 app.use(express.json());
 
 // ─── Install route (always available, no DB needed) ───────────────────────────
