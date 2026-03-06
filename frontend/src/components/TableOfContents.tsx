@@ -45,6 +45,13 @@ const fadeIn = keyframes`
 `
 
 /* ── Desktop Sidebar ── */
+const SidebarWrapper = styled.div`
+  grid-column: 3;
+  padding-left: 40px;
+  
+  @media (max-width: 1300px) { display: none; }
+`
+
 const Sidebar = styled.nav`
   position: sticky;
   top: 110px;
@@ -60,8 +67,6 @@ const Sidebar = styled.nav`
     background: var(--glass-border-color);
     border-radius: 4px;
   }
-
-  @media (max-width: 1200px) { display: none; }
 `
 
 const SidebarTitle = styled.div`
@@ -124,7 +129,7 @@ const Fab = styled.button`
 
   &:active { transform: scale(0.92); }
 
-  @media (max-width: 1200px) { display: flex; }
+  @media (max-width: 1300px) { display: flex; }
 `
 
 const Overlay = styled.div`
@@ -253,23 +258,25 @@ export default function TableOfContents({ headings }: Props) {
     return (
         <>
             {/* Desktop sidebar */}
-            <Sidebar>
-                <SidebarTitle>目录</SidebarTitle>
-                <TocList>
-                    {headings.map((h) => (
-                        <li key={h.id}>
-                            <TocLink
-                                $depth={h.level}
-                                $active={activeId === h.id}
-                                onClick={(e) => { e.preventDefault(); scrollTo(h.id) }}
-                                href={`#${h.id}`}
-                            >
-                                {h.text}
-                            </TocLink>
-                        </li>
-                    ))}
-                </TocList>
-            </Sidebar>
+            <SidebarWrapper>
+                <Sidebar>
+                    <SidebarTitle>目录</SidebarTitle>
+                    <TocList>
+                        {headings.map((h) => (
+                            <li key={h.id}>
+                                <TocLink
+                                    $depth={h.level}
+                                    $active={activeId === h.id}
+                                    onClick={(e) => { e.preventDefault(); scrollTo(h.id) }}
+                                    href={`#${h.id}`}
+                                >
+                                    {h.text}
+                                </TocLink>
+                            </li>
+                        ))}
+                    </TocList>
+                </Sidebar>
+            </SidebarWrapper>
 
             {/* Mobile FAB */}
             <Fab onClick={() => setSheetOpen(true)} aria-label="Table of Contents">

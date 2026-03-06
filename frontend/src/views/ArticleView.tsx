@@ -15,19 +15,20 @@ to {
 }
 `
 
-/* ── Layout: wider wrapper with flex for sidebar ── */
+/* ── Layout: wider wrapper with 3-column grid to center article ── */
 const PageWrapper = styled.div`
   min-height: 100vh;
   padding: 100px 20px 60px;
-  max-width: 1120px;
+  max-width: 1400px;
   margin: 0 auto;
-  display: flex;
-  gap: 32px;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 1fr 800px 1fr;
+  align-items: start;
 
-  @media (max-width: 1200px) {
-    max-width: 800px;
-    gap: 0;
+  @media (max-width: 1300px) {
+    display: flex;
+    justify-content: center;
+    max-width: 100%;
   }
   @media (max-width: 768px) {
     padding: 80px 16px 40px;
@@ -35,7 +36,8 @@ const PageWrapper = styled.div`
 `
 
 const MainColumn = styled.div`
-  flex: 1;
+  grid-column: 2;
+  width: 100%;
   min-width: 0;
   max-width: 800px;
 `
