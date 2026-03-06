@@ -79,11 +79,4 @@ app.listen(PORT, () => {
   }
 });
 
-// Serve frontend build files in production
-const frontendDistPath = path.join(__dirname, '../frontend/dist');
-app.use(express.static(frontendDistPath));
-
-// Fallback to index.html for React Router
-app.get('*', (req, res) => {
-  res.sendFile(path.join(frontendDistPath, 'index.html'));
-});
+// Note: Frontend is served by Cloudflare Pages, not this backend.
