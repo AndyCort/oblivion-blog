@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
 import styled from 'styled-components'
+import { motion, useScroll, useSpring } from 'framer-motion'
 
-const Bar = styled.div`
+const Bar = styled(motion.div)`
   position: fixed;
   top: 0;
   left: 0;
@@ -10,21 +10,15 @@ const Bar = styled.div`
   background-color: #ff8d9f;
   z-index: 10000;
   transform-origin: left;
-  transition: transform 0.2s ease;
 `
 
 export default function ScrollingBar() {
-    const [scrollProgress, setScrollProgress] = useState(0)
+    const { scrollYProgress } = useScroll()
+    const scaleX = useSpring(scrollYProgress, {
+        stiffness: 100,
+        damping: 30,
+        restDelta: 0.001
+    })
 
-    useEffect(() => {
-        const updateScroll = () => {
-            const scrollY = window.scrollY
-            const docHeight = document.documentElement.scrollHeight - window.innerHeight
-            setScrollProgress(docHeight > 0 ? scrollY / docHeight : 0)
-        }
-        window.addEventListener('scroll', updateScroll)
-        return () => window.removeEventListener('scroll', updateScroll)
-    }, [])
-
-    return <Bar style={{ transform: `scaleX(${scrollProgress})` }} />
+    return <Bar style={{ scaleX }} />
 }

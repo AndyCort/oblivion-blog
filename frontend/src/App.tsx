@@ -34,6 +34,7 @@ const GlobalStyle = createGlobalStyle`
   body {
     min-height: 100vh;
     font-family: var(--content-font);
+    background-color: var(--bg-color);
   }
 
   *::-webkit-scrollbar {

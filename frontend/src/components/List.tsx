@@ -17,8 +17,7 @@ const spin = keyframes`
 `
 
 const ListTitle = styled.h2`
-  color: v
-  ar(--main-color);
+  color: var(--text-color);
   font-size: 2.5rem;
   font-weight: 700;
   margin: 0 0 20px 0;
