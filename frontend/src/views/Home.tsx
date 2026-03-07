@@ -56,7 +56,7 @@ export default function Home() {
   return (
     <>
       <Helmet>
-        <title>Oblivion Blog - A personal space for code and life</title>
+        <title>Oblivion Blog</title>
       </Helmet>
       <HomeSection>
         <HomeBg />

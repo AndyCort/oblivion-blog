@@ -7,7 +7,7 @@ import MDEditor from '@uiw/react-md-editor';
 import { API_BASE } from '../api/config';
 const EditorContainer = styled.div`
   padding: 100px 24px 40px;
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   min-height: calc(100vh - 100px);
 `;
@@ -287,40 +287,74 @@ export default function ArticleEditor() {
         }
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, targetField: 'contentZh' | 'contentEn') => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        setIsUploading(true);
+    const uploadImage = async (file: File): Promise<string> => {
         const formDataPayload = new FormData();
         formDataPayload.append('image', file);
 
+        const response = await fetch(`${API_BASE}/api/upload`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formDataPayload
+        });
+
+        if (!response.ok) {
+            throw new Error('Image upload failed');
+        }
+
+        const data = await response.json();
+        return data.url;
+    };
+
+    const uploadAndInsertImage = async (file: File, targetField: 'contentZh' | 'contentEn') => {
+        setIsUploading(true);
         try {
-            const response = await fetch(`${API_BASE}/api/upload`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formDataPayload
-            });
-
-            if (!response.ok) {
-                throw new Error('Image upload failed');
-            }
-
-            const data = await response.json();
-            const imageMarkdown = `\n![${file.name}](${data.url})\n`;
-
+            const url = await uploadImage(file);
+            const imageMarkdown = `\n![${file.name}](${url})\n`;
             setFormData(prev => ({
                 ...prev,
                 [targetField]: prev[targetField] + imageMarkdown
             }));
-
         } catch (err: any) {
             setError(err.message || 'Failed to upload image');
         } finally {
             setIsUploading(false);
-            e.target.value = ''; // Reset input to allow uploading same file again
+        }
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, targetField: 'contentZh' | 'contentEn') => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        await uploadAndInsertImage(file, targetField);
+        e.target.value = ''; // Reset input to allow uploading same file again
+    };
+
+    const handlePaste = async (e: React.ClipboardEvent<HTMLDivElement>) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                e.preventDefault();
+                const file = items[i].getAsFile();
+                if (file) {
+                    await uploadAndInsertImage(file, activeLang === 'zh' ? 'contentZh' : 'contentEn');
+                }
+            }
+        }
+    };
+
+    const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+        const files = e.dataTransfer?.files;
+        if (!files) return;
+
+        for (let i = 0; i < files.length; i++) {
+            if (files[i].type.indexOf('image') !== -1) {
+                e.preventDefault();
+                await uploadAndInsertImage(files[i], activeLang === 'zh' ? 'contentZh' : 'contentEn');
+            }
         }
     };
 
@@ -453,14 +487,19 @@ export default function ArticleEditor() {
                             {isUploading && <span className="uploading">Uploading...</span>}
                         </UploadImageContainer>
                     </div>
-                    <div data-color-mode={theme}>
+                    <div
+                        data-color-mode={theme}
+                        onPaste={handlePaste}
+                        onDrop={handleDrop}
+                        onDragOver={(e) => e.preventDefault()}
+                    >
                         <MDEditor
                             value={activeLang === 'zh' ? formData.contentZh : formData.contentEn}
                             onChange={(val) => setFormData(prev => ({
                                 ...prev,
                                 [activeLang === 'zh' ? 'contentZh' : 'contentEn']: val || ''
                             }))}
-                            height={400}
+                            height={700}
                         />
                     </div>
                 </FormGroup>
