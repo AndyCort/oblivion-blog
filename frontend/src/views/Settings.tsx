@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../stores/AuthContext';
-import { useTheme } from '../stores/ThemeContext';
-import MDEditor from '@uiw/react-md-editor';
 import { API_BASE } from '../api/config';
 
 const SettingsContainer = styled.div`
@@ -119,7 +117,6 @@ const SuccessMessage = styled.div`
 export default function Settings({ isTab = false }: { isTab?: boolean }) {
     const navigate = useNavigate();
     const { isAdmin, token, login } = useAuth();
-    const { theme } = useTheme();
 
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -136,9 +133,7 @@ export default function Settings({ isTab = false }: { isTab?: boolean }) {
     const [formData, setFormData] = useState({
         siteTitle: '',
         siteSubtitle: '',
-        footerText: '',
-        aboutAvatar: '',
-        aboutContent: ''
+        footerText: ''
     });
 
     useEffect(() => {
@@ -158,9 +153,7 @@ export default function Settings({ isTab = false }: { isTab?: boolean }) {
                     setFormData({
                         siteTitle: data.siteTitle || '',
                         siteSubtitle: data.siteSubtitle || '',
-                        footerText: data.footerText || '',
-                        aboutAvatar: data.aboutAvatar || '',
-                        aboutContent: data.aboutContent || ''
+                        footerText: data.footerText || ''
                     });
                 }
             }
@@ -293,30 +286,6 @@ export default function Settings({ isTab = false }: { isTab?: boolean }) {
                     />
                 </FormGroup>
 
-                <hr style={{ borderColor: 'var(--border-color)', margin: '10px 0' }} />
-
-                <h3>"About" Page Details</h3>
-                <FormGroup>
-                    <label>Avatar / Emoji</label>
-                    <input
-                        required
-                        name="aboutAvatar"
-                        value={formData.aboutAvatar}
-                        onChange={handleChange}
-                        placeholder="🧑‍💻"
-                    />
-                </FormGroup>
-
-                <FormGroup>
-                    <label>About Content (Markdown supported)</label>
-                    <div data-color-mode={theme}>
-                        <MDEditor
-                            value={formData.aboutContent}
-                            onChange={(val) => setFormData(prev => ({ ...prev, aboutContent: val || '' }))}
-                            height={300}
-                        />
-                    </div>
-                </FormGroup>
 
                 <SubmitButton type="submit" disabled={isSaving}>
                     {isSaving ? 'Saving...' : 'Save Settings'}

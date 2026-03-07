@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
-import styled, { keyframes } from 'styled-components';
+import { useState, useEffect, useMemo } from 'react';
+import styled from 'styled-components';
 import { useAuth } from '../stores/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Settings from './Settings';
@@ -72,83 +72,6 @@ const NewButton = styled.button`
   }
 `;
 
-const spinKf = keyframes`to { transform: rotate(360deg); }`;
-
-const UpdateBtn = styled.button<{ $status: 'idle' | 'pulling' | 'ok' | 'err' }>`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 7px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid var(--glass-border-color);
-  background: rgba(255,255,255,0.05);
-  color: ${p => p.$status === 'ok' ? '#48c78e' : p.$status === 'err' ? '#ff7070' : 'var(--text-color)'};
-  transition: all 0.2s;
-  &:hover:not(:disabled) { background: rgba(255,255,255,0.1); }
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
-`;
-
-const SpinIcon = styled.span`
-  display: inline-block;
-  animation: ${spinKf} 0.8s linear infinite;
-`;
-
-const LogOverlay = styled.div`
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 420px;
-  max-height: 280px;
-  background: rgba(10,10,18,0.96);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-`;
-
-const LogHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--title-color);
-
-  button {
-    background: none;
-    border: none;
-    color: var(--text-color);
-    cursor: pointer;
-    font-size: 16px;
-    line-height: 1;
-    &:hover { color: var(--title-color); }
-  }
-`;
-
-const LogBody = styled.pre`
-  flex: 1;
-  margin: 0;
-  padding: 12px 16px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  line-height: 1.6;
-  color: #b0bec5;
-  overflow-y: auto;
-  white-space: pre-wrap;
-  word-break: break-word;
-
-  &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-`;
 
 const StatsGrid = styled.div`
   display: grid;
@@ -341,56 +264,9 @@ export default function Admin() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState<'articles' | 'settings'>('articles');
+  const [activeTab, setActiveTab] = useState<'articles' | 'settings' | 'users' | 'themes'>('articles');
   const itemsPerPage = 10;
 
-  // ── Git pull state ────────────────────────────────────────────────────────
-  const [pullStatus, setPullStatus] = useState<'idle' | 'pulling' | 'ok' | 'err'>('idle');
-  const [pullLog, setPullLog] = useState('');
-  const [showLog, setShowLog] = useState(false);
-  const logBodyRef = useRef<HTMLPreElement>(null);
-  const mountedRef = useRef(true);
-  useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
-  useEffect(() => {
-    if (logBodyRef.current) logBodyRef.current.scrollTop = logBodyRef.current.scrollHeight;
-  }, [pullLog]);
-
-  const handlePull = async () => {
-    if (pullStatus === 'pulling') return;
-    setPullStatus('pulling');
-    setPullLog('');
-    setShowLog(true);
-    const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '').replace(/\r/g, '');
-    try {
-      const res = await fetch(`${API_BASE}/api/deploy/pull`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      });
-      if (!res.ok || !res.body) { setPullStatus('err'); setPullLog('❌ 请求失败'); return; }
-      const reader = res.body.getReader();
-      const dec = new TextDecoder();
-      let buf = '';
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        if (!mountedRef.current) { reader.cancel(); return; }
-        buf += dec.decode(value, { stream: true });
-        const lines = buf.split('\n'); buf = lines.pop() ?? '';
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          try {
-            const ev = JSON.parse(line.slice(6)) as { type: string; data: unknown };
-            if (!mountedRef.current) return;
-            if (ev.type === 'log') setPullLog(p => p + stripAnsi(ev.data as string));
-            else if (ev.type === 'done') setPullStatus((ev.data as { success: boolean }).success ? 'ok' : 'err');
-          } catch (_) { }
-        }
-      }
-    } catch (e) {
-      if (mountedRef.current) { setPullLog(p => p + `\n❌ ${String(e)}`); setPullStatus('err'); }
-    }
-  };
 
   useEffect(() => {
     if (!isAdmin) {
@@ -479,24 +355,12 @@ export default function Admin() {
   return (
     <AdminContainer>
       <Header>
-        <h1>Admin Dashboard</h1>
+        <h1>Dashboard</h1>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <UpdateBtn
-            $status={pullStatus}
-            disabled={pullStatus === 'pulling'}
-            onClick={handlePull}
-            title="从 GitHub 拉取最新代码"
-          >
-            {pullStatus === 'pulling' ? <SpinIcon>🔄</SpinIcon> :
-              pullStatus === 'ok' ? '✅' :
-                pullStatus === 'err' ? '❌' : '🔄'}
-            {pullStatus === 'pulling' ? '更新中…' :
-              pullStatus === 'ok' ? '已更新' :
-                pullStatus === 'err' ? '失败' : 'Update'}
-          </UpdateBtn>
+
           {activeTab === 'articles' && (
             <NewButton onClick={() => navigate('/admin/new')}>
-              Write New Article
+              New Article
             </NewButton>
           )}
         </div>
@@ -504,11 +368,18 @@ export default function Admin() {
 
       <Tabs>
         <TabButton active={activeTab === 'articles'} onClick={() => setActiveTab('articles')}>
-          Articles Management
+          Articles
         </TabButton>
         <TabButton active={activeTab === 'settings'} onClick={() => setActiveTab('settings')}>
-          Site Settings
+          Settings
         </TabButton>
+        <TabButton active={activeTab === 'users'} onClick={() => setActiveTab('users')}>
+          Users
+        </TabButton>
+        <TabButton active={activeTab === 'themes'} onClick={() => setActiveTab('themes')}>
+          Themes
+        </TabButton>
+
       </Tabs>
 
       {activeTab === 'articles' ? (
@@ -591,16 +462,6 @@ export default function Admin() {
         <Settings isTab />
       )}
 
-      {/* ── Git pull log overlay ── */}
-      {showLog && (
-        <LogOverlay>
-          <LogHeader>
-            <span>🔄 GitHub Update</span>
-            <button onClick={() => { setShowLog(false); if (pullStatus !== 'pulling') setPullStatus('idle'); }}>✕</button>
-          </LogHeader>
-          <LogBody ref={logBodyRef}>{pullLog || '正在连接…'}</LogBody>
-        </LogOverlay>
-      )}
     </AdminContainer>
   );
 }
