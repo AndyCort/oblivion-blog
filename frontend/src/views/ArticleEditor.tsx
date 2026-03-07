@@ -61,7 +61,7 @@ const FormGroup = styled.div`
     font-weight: 500;
   }
 
-  input, textarea {
+  & > input, & > textarea {
     padding: 12px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
@@ -77,7 +77,7 @@ const FormGroup = styled.div`
     }
   }
 
-  textarea {
+  & > textarea {
     min-height: 200px;
     resize: vertical;
   }
