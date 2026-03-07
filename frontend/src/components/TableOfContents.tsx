@@ -48,13 +48,15 @@ const fadeIn = keyframes`
 const SidebarWrapper = styled.div`
   grid-column: 3;
   padding-left: 40px;
+  position: sticky;
+  top: 110px;
+  align-self: start;
+  z-index: 10;
   
   @media (max-width: 1300px) { display: none; }
 `
 
 const Sidebar = styled.nav`
-  position: sticky;
-  top: 110px;
   max-height: calc(100vh - 140px);
   overflow-y: auto;
   width: 220px;

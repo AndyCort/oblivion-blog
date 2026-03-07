@@ -23,6 +23,7 @@ const PageWrapper = styled.div`
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 800px 1fr;
+  align-items: start;
 
   @media (max-width: 1300px) {
     display: flex;
@@ -204,7 +205,7 @@ const Body = styled.div`
       height: 4px;
       border-radius: 4px;
       background: linear-gradient(to right, var(--main-color), var(--main-color));
-      transform: translateX(-50%);
+      transform: translateX(-50%);y
       transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
   }
 
