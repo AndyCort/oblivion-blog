@@ -11,6 +11,10 @@ const articleSchema = new mongoose.Schema(
             zh: { type: String, default: '' },
             en: { type: String, default: '' },
         },
+        coverImage: {
+            type: String,
+            default: '',
+        },
         date: {
             type: String,
             required: true,

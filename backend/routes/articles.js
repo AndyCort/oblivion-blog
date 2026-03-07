@@ -73,7 +73,7 @@ router.get('/search/:query', async (req, res) => {
 // @access  Private
 router.post('/', protect, async (req, res) => {
     try {
-        const { title, date, tags, content, isPublished } = req.body;
+        const { title, coverImage, date, tags, content, isPublished } = req.body;
 
         // Generate a simple auto-increment ID for compatibility with previous logic
         const lastArticle = await Article.findOne().sort({ id: -1 });
@@ -82,6 +82,7 @@ router.post('/', protect, async (req, res) => {
         const article = await Article.create({
             id: newId,
             title,
+            coverImage,
             date,
             tags,
             content,
