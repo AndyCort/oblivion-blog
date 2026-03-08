@@ -258,27 +258,24 @@ const CoverPreview = styled.div<{ $hasImage: boolean }>`
   justify-content: center;
   background-size: cover;
   background-position: center;
-  cursor: pointer;
   position: relative;
   overflow: hidden;
   transition: all 0.3s;
   background-color: rgba(255,255,255,0.02);
 
-  &:hover {
-    border-color: var(--accent-color);
-    background-color: rgba(255,255,255,0.05);
-    &::after {
-      content: 'Upload Cover Photo';
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 16px;
-    }
+  .cover-actions {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  &:hover .cover-actions {
+    opacity: 1;
   }
 
   i {
@@ -290,6 +287,127 @@ const CoverPreview = styled.div<{ $hasImage: boolean }>`
   span {
     color: var(--text-color);
     font-size: 14px;
+  }
+`;
+
+const CoverButton = styled.button`
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: var(--main-color);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 2;
+  transition: all 0.2s;
+  
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+`;
+
+const DropdownMenu = styled.div`
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  overflow: hidden;
+`;
+
+const DropdownItem = styled.div`
+  padding: 12px 16px;
+  color: var(--text-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  
+  &:hover {
+    background: rgba(255,255,255,0.1);
+  }
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+`;
+
+const UrlInputModal = styled.div`
+  background: var(--bg-color);
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  border: 1px solid var(--glass-border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  
+  h3 {
+    margin: 0;
+    color: var(--title-color);
+  }
+  
+  input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-color);
+    outline: none;
+    
+    &:focus {
+      border-color: var(--accent-color);
+    }
+  }
+  
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    
+    button {
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: transparent;
+      color: var(--text-color);
+      cursor: pointer;
+      
+      &:hover {
+        background: rgba(255,255,255,0.1);
+      }
+      
+      &.primary {
+        background: var(--main-color);
+        color: white;
+        border: none;
+        
+        &:hover {
+          opacity: 0.9;
+        }
+      }
+    }
   }
 `;
 
@@ -344,6 +462,11 @@ export default function ArticleEditor() {
     const [lastSaved, setLastSaved] = useState<Date | null>(null);
     const [tagInput, setTagInput] = useState('');
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+    // Cover Image States
+    const [isCoverDropdownOpen, setIsCoverDropdownOpen] = useState(false);
+    const [isUrlModalOpen, setIsUrlModalOpen] = useState(false);
+    const [coverUrlInput, setCoverUrlInput] = useState('');
 
     const [formData, setFormData] = useState({
         titleZh: '',
@@ -602,6 +725,14 @@ export default function ArticleEditor() {
         setHasUnsavedChanges(true);
     };
 
+    const handleCoverUrlSave = () => {
+        if (!coverUrlInput.trim()) return;
+        setFormData(prev => ({ ...prev, coverImage: coverUrlInput.trim() }));
+        setHasUnsavedChanges(true);
+        setIsUrlModalOpen(false);
+        setCoverUrlInput('');
+    };
+
     const getWordCount = (text: string) => {
         if (!text) return 0;
         const cjk = (text.match(/[\u4e00-\u9fa5]/g) || []).length;
@@ -707,18 +838,97 @@ export default function ArticleEditor() {
 
                 <FormGroup>
                     <label>Cover Image (Optional)</label>
-                    <label htmlFor="cover-upload" style={{ width: '100%', cursor: 'pointer', display: 'block' }}>
+                    <div style={{ position: 'relative' }}>
                         <CoverPreview $hasImage={!!formData.coverImage} style={formData.coverImage ? { backgroundImage: `url(${formData.coverImage})` } : {}}>
                             {!formData.coverImage && (
                                 <>
                                     <i className="fa-solid fa-image"></i>
-                                    <span>Click to upload cover photo</span>
+                                    <span>No cover image selected</span>
                                 </>
                             )}
-                            <input id="cover-upload" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleCoverUpload} />
+                            <div className="cover-actions">
+                                <CoverButton
+                                    type="button"
+                                    onClick={() => setIsCoverDropdownOpen(!isCoverDropdownOpen)}
+                                >
+                                    <i className="fa-solid fa-camera"></i>
+                                    {formData.coverImage ? 'Change Cover' : 'Set Cover'}
+                                </CoverButton>
+                            </div>
                         </CoverPreview>
-                    </label>
+
+                        {isCoverDropdownOpen && (
+                            <>
+                                <div
+                                    style={{ position: 'fixed', inset: 0, zIndex: 9 }}
+                                    onClick={() => setIsCoverDropdownOpen(false)}
+                                />
+                                <DropdownMenu>
+                                    <label htmlFor="cover-upload" style={{ margin: 0 }}>
+                                        <DropdownItem onClick={() => setIsCoverDropdownOpen(false)}>
+                                            <i className="fa-solid fa-upload" style={{ width: '20px' }}></i>
+                                            Upload Local Image
+                                        </DropdownItem>
+                                    </label>
+                                    <input
+                                        id="cover-upload"
+                                        type="file"
+                                        accept="image/*"
+                                        style={{ display: 'none' }}
+                                        onChange={handleCoverUpload}
+                                    />
+
+                                    <DropdownItem onClick={() => {
+                                        setIsCoverDropdownOpen(false);
+                                        setIsUrlModalOpen(true);
+                                    }}>
+                                        <i className="fa-solid fa-link" style={{ width: '20px' }}></i>
+                                        Enter Image URL
+                                    </DropdownItem>
+
+                                    {formData.coverImage && (
+                                        <DropdownItem
+                                            style={{ color: '#ff4d4f' }}
+                                            onClick={() => {
+                                                setFormData(prev => ({ ...prev, coverImage: '' }));
+                                                setHasUnsavedChanges(true);
+                                                setIsCoverDropdownOpen(false);
+                                            }}
+                                        >
+                                            <i className="fa-solid fa-trash" style={{ width: '20px' }}></i>
+                                            Remove Cover
+                                        </DropdownItem>
+                                    )}
+                                </DropdownMenu>
+                            </>
+                        )}
+                    </div>
                 </FormGroup>
+
+                {isUrlModalOpen && (
+                    <ModalOverlay onClick={() => setIsUrlModalOpen(false)}>
+                        <UrlInputModal onClick={e => e.stopPropagation()}>
+                            <h3>Enter Image URL</h3>
+                            <input
+                                type="url"
+                                placeholder="https://example.com/image.jpg"
+                                value={coverUrlInput}
+                                onChange={e => setCoverUrlInput(e.target.value)}
+                                autoFocus
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        handleCoverUrlSave();
+                                    }
+                                }}
+                            />
+                            <div className="actions">
+                                <button type="button" onClick={() => setIsUrlModalOpen(false)}>Cancel</button>
+                                <button type="button" className="primary" onClick={handleCoverUrlSave}>Save</button>
+                            </div>
+                        </UrlInputModal>
+                    </ModalOverlay>
+                )}
 
                 <EditorsGrid $dual={isDualPane}>
                     {/* Only Show ZH if not dual or active is zh */}
